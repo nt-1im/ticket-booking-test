@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/main :: head('Sign Up')}"></head>
+<body>
+
+    <header th:replace="~{layout/main :: navbar}"></header>
+    
+    <div th:replace="~{layout/main :: toasts}"></div>
+
+    <main style="display: flex; align-items: center; justify-content: center; min-height: 80vh; padding: 40px 24px;">
+        <div class="auth-container glass-card" style="margin: 0; width: 100%;">
+            <h2 class="auth-title">Create Account</h2>
+            <p class="auth-subtitle">Join us to start booking tickets or selling your own events.</p>
+            
+            <div th:if="${registrationError}" class="badge badge-danger" style="width: 100%; text-align: center; padding: 12px; margin-bottom: 20px; border-radius: 10px;" th:text="${registrationError}">
+                Registration failed
+            </div>
+
+            <form th:action="@{/register}" th:object="${user}" method="post">
+                <div class="auth-form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" th:field="*{username}" class="form-input" placeholder="e.g. johndoe" required>
+                    <div class="field-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Username error</div>
+                </div>
+                
+                <div class="auth-form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" th:field="*{email}" class="form-input" placeholder="e.g. john@example.com" required>
+                    <div class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Email error</div>
+                </div>
+                
+                <div class="auth-form-group">
+                    <label for="password">Password (at least 6 characters)</label>
+                    <input type="password" id="password" th:field="*{password}" class="form-input" placeholder="••••••••" required>
+                    <div class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Password error</div>
+                </div>
+                
+                <div class="auth-form-group">
+                    <label for="role">Register as</label>
+                    <select id="role" th:field="*{role}" class="form-select" required>
+                        <option th:value="${T(com.example.ticketbooking.model.Role).ROLE_BUYER}">Buyer (Search & purchase tickets)</option>
+                        <option th:value="${T(com.example.ticketbooking.model.Role).ROLE_SELLER}">Seller (Create & sell tickets)</option>
+                    </select>
+                    <div class="field-error" th:if="${#fields.hasErrors('role')}" th:errors="*{role}">Role error</div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary auth-submit-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <line x1="19" x2="19" y1="8" y2="14"/>
+                        <line x1="22" x2="16" y1="11" y2="11"/>
+                    </svg>
+                    Create Account
+                </button>
+            </form>
+            
+            <div class="auth-footer-link">
+                Already have an account? <a th:href="@{/login}">Sign In</a>
+            </div>
+        </div>
+    </main>
+
+    <footer th:replace="~{layout/main :: footer}"></footer>
+    
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

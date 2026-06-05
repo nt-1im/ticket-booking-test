@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title + ' | RailPass'}">RailPass</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+    <!-- Reusable Navbar -->
+    <header th:fragment="navbar">
+        <nav class="navbar">
+            <a th:href="@{/}" class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #00f0ff; filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.5));">
+                    <rect x="4" y="3" width="16" height="16" rx="2"/>
+                    <path d="M4 11h16"/>
+                    <path d="M12 3v8"/>
+                    <path d="m8 19-2 3"/>
+                    <path d="m16 19 2 3"/>
+                </svg>
+                <span>RailPass</span>
+            </a>
+            
+            <ul class="nav-links">
+                <li><a th:href="@{/}" th:classappend="${#request.requestURI == '/' ? 'active-link' : ''}">Trains</a></li>
+                
+                <!-- If logged in, show Dashboard link -->
+                <li sec:authorize="isAuthenticated()">
+                    <a th:href="@{/dashboard}" th:classappend="${#request.requestURI.startsWith('/dashboard') ? 'active-link' : ''}">Dashboard</a>
+                </li>
+                
+                <!-- If Admin, show User Admin link -->
+                <li sec:authorize="hasRole('ADMIN')">
+                    <a th:href="@{/dashboard/admin}" th:classappend="${#request.requestURI == '/dashboard/admin' ? 'active-link' : ''}">Admin Panel</a>
+                </li>
+
+                <!-- If Authenticated, show Profile & Logout -->
+                <li sec:authorize="isAuthenticated()" style="display: flex; align-items: center; gap: 16px;">
+                    <span style="color: var(--text-secondary); font-size: 14px; font-weight: 500;">
+                        Hi, <strong style="color: var(--text-primary);" sec:authentication="name">User</strong>
+                    </span>
+                    <a th:href="@{/logout}" class="btn btn-secondary" style="padding: 6px 12px; font-size: 13px;">Logout</a>
+                </li>
+
+                <!-- If Anonymous, show Login & Register -->
+                <li sec:authorize="isAnonymous()">
+                    <a th:href="@{/login}" class="btn btn-secondary" style="padding: 8px 16px;">Sign In</a>
+                </li>
+                <li sec:authorize="isAnonymous()">
+                    <a th:href="@{/register}" class="btn btn-primary" style="padding: 8px 16px;">Sign Up</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Reusable Toast Notifications -->
+    <div th:fragment="toasts" class="toast-container">
+        <!-- Success messages -->
+        <div th:if="${successMessage}" class="toast toast-success">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            <span th:text="${successMessage}">Operation successful!</span>
+        </div>
+        
+        <!-- Error messages -->
+        <div th:if="${errorMessage}" class="toast toast-error">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" x2="12" y1="8" y2="12"/>
+                <line x1="12" x2="12.01" y1="16" y2="16"/>
+            </svg>
+            <span th:text="${errorMessage}">Something went wrong!</span>
+        </div>
+    </div>
+
+    <!-- Reusable Footer -->
+    <footer th:fragment="footer">
+        <p>&copy; 2026 RailPass Train Ticket Booking System. Designed with premium dark-glass aesthetics.</p>
+    </footer>
+
+</body>
+</html>

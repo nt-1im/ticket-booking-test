@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/main :: head('Buyer Dashboard')}"></head>
+<body>
+
+    <header th:replace="~{layout/main :: navbar}"></header>
+    
+    <div th:replace="~{layout/main :: toasts}"></div>
+
+    <main>
+        <div class="dashboard-grid">
+            <!-- Sidebar -->
+            <div class="dashboard-sidebar">
+                <div class="glass-card user-profile-widget">
+                    <div class="avatar-mockup" th:text="${#strings.substring(currentUser.username, 0, 1).toUpperCase()}">B</div>
+                    <h3 class="user-name" th:text="${currentUser.username}">buyer</h3>
+                    <span class="user-role-badge">Passenger</span>
+                    <p style="color: var(--text-muted); font-size: 13px; margin-top: 10px;" th:text="${currentUser.email}">buyer@example.com</p>
+                </div>
+                
+                <div class="glass-card" style="padding: 16px;">
+                    <ul class="dashboard-menu">
+                        <li><a th:href="@{/dashboard/buyer}" class="dashboard-menu-link active">My Boarding Passes</a></li>
+                        <li><a th:href="@{/}" class="dashboard-menu-link">Search Trains</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main dashboard content -->
+            <div>
+                <h2 class="events-section-title">My Train Tickets</h2>
+
+                <!-- Empty state -->
+                <div th:if="${tickets.isEmpty()}" class="glass-card" style="text-align: center; padding: 60px 20px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted); margin-bottom: 16px;">
+                        <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+                        <path d="M9 5v14"/>
+                        <path d="M15 5v14"/>
+                    </svg>
+                    <h3 style="margin-bottom: 8px;">No boarding passes booked yet</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">You haven't bought tickets for any train routes. Search routes and reserve seats now!</p>
+                    <a th:href="@{/}" class="btn btn-primary">Browse Trains</a>
+                </div>
+
+                <!-- Tickets List -->
+                <div class="ticket-list" th:if="${!tickets.isEmpty()}">
+                    <div th:each="ticket : ${tickets}" class="glass-card ticket-pass" th:styleappend="${ticket.status.name() == 'CANCELLED' ? 'opacity: 0.6;' : ''}">
+                        <!-- Main ticket area -->
+                        <div class="ticket-pass-main">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div class="train-mini-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="4" y="3" width="16" height="16" rx="2"/>
+                                            <path d="M4 11h16"/>
+                                            <path d="M12 3v8"/>
+                                        </svg>
+                                    </div>
+                                    <h3 th:text="${ticket.train.trainNumber + ' TIMETABLE'}" style="font-size: 16px; font-weight: 700; color: var(--text-primary);">SE1 TIMETABLE</h3>
+                                </div>
+                                <span class="badge" th:classappend="${ticket.status.name() == 'BOOKED' ? 'badge-success' : 'badge-danger'}" th:text="${ticket.status}">BOOKED</span>
+                            </div>
+                            
+                            <!-- Origin and Destination timeline -->
+                            <div style="display: flex; align-items: center; gap: 24px; margin: 16px 0;">
+                                <div>
+                                    <div style="color: var(--text-secondary); font-size: 10px;">DEPARTURE</div>
+                                    <strong th:text="${ticket.train.departureStation}" style="font-size: 18px; color: var(--text-primary);">Hà Nội</strong>
+                                    <div th:text="${#temporals.format(ticket.train.departureTime, 'HH:mm')}" style="font-size: 13px; color: var(--secondary); font-weight: 600;">19:00</div>
+                                </div>
+                                <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
+                                    <span style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">Direct Route</span>
+                                    <div style="width: 100%; height: 2px; background: dashed var(--border-glass); position: relative;">
+                                        <div style="position: absolute; width: 6px; height: 6px; border-radius: 50%; background: var(--secondary); top: -2px; left: 0;"></div>
+                                        <div style="position: absolute; width: 6px; height: 6px; border-radius: 50%; background: var(--secondary); top: -2px; right: 0;"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="color: var(--text-secondary); font-size: 10px; text-align: right;">ARRIVAL</div>
+                                    <strong th:text="${ticket.train.arrivalStation}" style="font-size: 18px; color: var(--text-primary); display: block; text-align: right;">Sài Gòn</strong>
+                                    <div style="font-size: 13px; color: var(--text-muted); text-align: right;">Next Days</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Passenger and Seat Allocation -->
+                            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px; font-size: 13px; padding-top: 12px; border-top: 1px dashed var(--border-glass);">
+                                <div>
+                                    <span style="color: var(--text-secondary); font-size: 10px; display: block;">PASSENGER</span>
+                                    <strong th:text="${ticket.passengerName}">Nguyen Van A</strong>
+                                    <span th:text="${'ID: ' + ticket.passengerIdCard}" style="display: block; font-size: 11px; color: var(--text-muted);">ID: 123456789</span>
+                                </div>
+                                <div>
+                                    <span style="color: var(--text-secondary); font-size: 10px; display: block;">COACH / CARRIAGE</span>
+                                    <strong th:text="${ticket.carriageNumber}">1</strong>
+                                </div>
+                                <div>
+                                    <span style="color: var(--text-secondary); font-size: 10px; display: block;">SEAT NO.</span>
+                                    <strong th:text="${ticket.seatNumber}">5</strong>
+                                </div>
+                            </div>
+
+                            <!-- Payment details and metadata -->
+                            <div style="display: flex; gap: 32px; font-size: 12px; margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05);">
+                                <div>
+                                    <span style="color: var(--text-secondary); font-size: 10px;">QUANTITY</span>
+                                    <div th:text="${ticket.quantity + ' Ticket(s)'}">1 Ticket</div>
+                                </div>
+                                <div>
+                                    <span style="color: var(--text-secondary); font-size: 10px;">TOTAL FARE</span>
+                                    <div style="color: var(--secondary); font-weight: 600;" th:text="${#numbers.formatDecimal(ticket.totalPrice, 0, 'COMMA', 0, 'POINT') + ' ₫'}">1,200,000 ₫</div>
+                                </div>
+                                <div>
+                                    <span style="color: var(--text-secondary); font-size: 10px;">BOOKED DATE</span>
+                                    <div th:text="${#temporals.format(ticket.bookingDate, 'dd MMM yyyy, HH:mm')}">Date</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Ticket Stub -->
+                        <div class="ticket-pass-stub">
+                            <div th:if="${ticket.status.name() == 'BOOKED'}" class="ticket-barcode-mock"></div>
+                            <span th:if="${ticket.status.name() == 'BOOKED'}" style="font-size: 10px; color: var(--text-secondary); letter-spacing: 2px; margin-bottom: 16px;">
+                                BOARDING PASS ID: <th:block th:text="${'RL-' + ticket.id + '-' + #strings.substring(ticket.buyer.username, 0, 2).toUpperCase()}">RL-1</th:block>
+                            </span>
+                            
+                            <!-- Cancel Button Form -->
+                            <form th:action="@{/tickets/cancel/{id}(id=${ticket.id})}" method="post" th:if="${ticket.status.name() == 'BOOKED'}">
+                                <button type="submit" class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;" onclick="return confirm('Are you sure you want to cancel this ticket reservation? You will get a full refund.')">
+                                    Cancel Booking
+                                </button>
+                            </form>
+                            
+                            <span th:if="${ticket.status.name() == 'CANCELLED'}" style="color: var(--error); font-weight: 700; font-size: 14px;">
+                                REFUNDED / CANCELLED
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer th:replace="~{layout/main :: footer}"></footer>
+    
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

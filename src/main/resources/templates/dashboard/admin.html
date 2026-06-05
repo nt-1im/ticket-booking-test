@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/main :: head('Admin Console')}"></head>
+<body>
+
+    <header th:replace="~{layout/main :: navbar}"></header>
+    
+    <div th:replace="~{layout/main :: toasts}"></div>
+
+    <main>
+        <div class="dashboard-grid">
+            <!-- Sidebar -->
+            <div class="dashboard-sidebar">
+                <div class="glass-card user-profile-widget">
+                    <div class="avatar-mockup" style="background: linear-gradient(135deg, var(--accent), var(--primary));" th:text="${#strings.substring(currentUser.username, 0, 1).toUpperCase()}">A</div>
+                    <h3 class="user-name" th:text="${currentUser.username}">admin</h3>
+                    <span class="user-role-badge" style="color: var(--accent); border-color: var(--accent);">System Admin</span>
+                    <p style="color: var(--text-muted); font-size: 13px; margin-top: 10px;" th:text="${currentUser.email}">admin@example.com</p>
+                </div>
+                
+                <div class="glass-card" style="padding: 16px;">
+                    <ul class="dashboard-menu">
+                        <li><a href="#users-section" class="dashboard-menu-link active">Users Directory</a></li>
+                        <li><a href="#trains-section" class="dashboard-menu-link">System Trains</a></li>
+                        <li><a href="#bookings-section" class="dashboard-menu-link">System Bookings</a></li>
+                        <li><a th:href="@{/}" class="dashboard-menu-link">Browse Trains</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Panel -->
+            <div>
+                <!-- Statistics -->
+                <div class="stats-row">
+                    <div class="glass-card stat-card">
+                        <span class="stat-title">TOTAL REVENUE</span>
+                        <span class="stat-value glow-cyan" th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT') + ' ₫'}">0 ₫</span>
+                    </div>
+                    <div class="glass-card stat-card">
+                        <span class="stat-title">TOTAL BOOKINGS</span>
+                        <span class="stat-value glow-green" th:text="${totalBookings}">0</span>
+                    </div>
+                    <div class="glass-card stat-card">
+                        <span class="stat-title">OPERATORS COUNT</span>
+                        <span class="stat-value" th:text="${totalSellers}">0</span>
+                    </div>
+                    <div class="glass-card stat-card">
+                        <span class="stat-title">PASSENGERS COUNT</span>
+                        <span class="stat-value" th:text="${totalBuyers}">0</span>
+                    </div>
+                </div>
+
+                <!-- Users Section -->
+                <section id="users-section" style="margin-bottom: 50px;">
+                    <h2 class="events-section-title">Users Directory</h2>
+                    
+                    <div class="glass-card table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>User Info</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th style="text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="user : ${users}">
+                                    <td>
+                                        <div style="font-weight: 600;" th:text="${user.username}">username</div>
+                                        <span style="font-size: 11px; color: var(--text-muted);" th:text="${user.email}">email</span>
+                                    </td>
+                                    <td>
+                                        <!-- Update role form -->
+                                        <form th:action="@{/dashboard/admin/update-role/{id}(id=${user.id})}" method="post" style="display: inline-flex; align-items: center; gap: 8px;">
+                                            <select name="role" class="form-select" style="padding: 4px 8px; font-size: 12px; width: 130px;" th:disabled="${currentUser.id == user.id}">
+                                                <option th:each="roleOpt : ${T(com.example.ticketbooking.model.Role).values()}" 
+                                                        th:value="${roleOpt}" 
+                                                        th:text="${roleOpt.name().substring(5)}"
+                                                        th:selected="${roleOpt == user.role}"></option>
+                                            </select>
+                                            <button type="submit" class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;" th:disabled="${currentUser.id == user.id}">Update</button>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <span class="badge" th:classappend="${user.enabled ? 'badge-success' : 'badge-danger'}" th:text="${user.enabled ? 'ACTIVE' : 'BLOCKED'}">Status</span>
+                                    </td>
+                                    <td>
+                                        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                                            <!-- Toggle Enable/Disable form -->
+                                            <form th:action="@{/dashboard/admin/toggle-user/{id}(id=${user.id})}" method="post" onsubmit="return confirm('Change status for this user?')">
+                                                <button type="submit" class="btn" th:classappend="${user.enabled ? 'btn-danger' : 'btn-primary'}" style="padding: 6px 12px; font-size: 12px;" th:disabled="${currentUser.id == user.id}">
+                                                    <th:block th:text="${user.enabled ? 'Disable' : 'Enable'}">Toggle</th:block>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Trains Section -->
+                <section id="trains-section" style="margin-bottom: 50px;">
+                    <h2 class="events-section-title">All System Trains</h2>
+                    
+                    <div th:if="${trains.isEmpty()}" class="glass-card" style="text-align: center; padding: 20px; color: var(--text-secondary);">
+                        No trains listed.
+                    </div>
+
+                    <div class="glass-card table-container" th:if="${!trains.isEmpty()}">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Train Details</th>
+                                    <th>Route</th>
+                                    <th>Operator</th>
+                                    <th>Price / Fare</th>
+                                    <th>Available Seats</th>
+                                    <th style="text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="train : ${trains}">
+                                    <td>
+                                        <div style="font-weight: 700; color: var(--secondary);" th:text="${train.trainNumber}">SE1</div>
+                                        <span style="font-size: 11px; color: var(--text-muted);" th:text="${#temporals.format(train.departureDate, 'dd MMM yyyy') + ' at ' + #temporals.format(train.departureTime, 'HH:mm')}">Date / Time</span>
+                                    </td>
+                                    <td>
+                                        <strong th:text="${train.departureStation}">Hanoi</strong>
+                                        <span style="color: var(--text-muted); margin: 0 4px;">&rarr;</span>
+                                        <strong th:text="${train.arrivalStation}">Saigon</strong>
+                                    </td>
+                                    <td th:text="${train.seller.username}">seller</td>
+                                    <td th:text="${train.price > 0 ? #numbers.formatDecimal(train.price, 0, 'COMMA', 0, 'POINT') + ' ₫' : 'Free'}">0 ₫</td>
+                                    <td th:text="${train.availableSeats + ' / ' + train.totalSeats}">0/0</td>
+                                    <td>
+                                        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                                            <a th:href="@{/trains/detail/{id}(id=${train.id})}" class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;">View</a>
+                                            <a th:href="@{/trains/edit/{id}(id=${train.id})}" class="btn btn-primary" style="padding: 6px 12px; font-size: 12px; background: linear-gradient(135deg, #00f0ff, #0072ff); box-shadow: none;">Edit</a>
+                                            <form th:action="@{/trains/delete/{id}(id=${train.id})}" method="post" style="display: inline;" onsubmit="return confirm('Confirm train timetable deletion?')">
+                                                <button type="submit" class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;">Delete</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Bookings Section -->
+                <section id="bookings-section">
+                    <h2 class="events-section-title">System-wide Bookings</h2>
+                    
+                    <div th:if="${tickets.isEmpty()}" class="glass-card" style="text-align: center; padding: 20px; color: var(--text-secondary);">
+                        No bookings exist.
+                    </div>
+
+                    <div class="glass-card table-container" th:if="${!tickets.isEmpty()}">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Booking ID</th>
+                                    <th>Train</th>
+                                    <th>Passenger Info</th>
+                                    <th>Seat Info</th>
+                                    <th>Qty</th>
+                                    <th>Total Cost</th>
+                                    <th>Status</th>
+                                    <th style="text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="ticket : ${tickets}">
+                                    <td th:text="${'#RL-' + ticket.id}">#RL-1</td>
+                                    <td th:text="${ticket.train.trainNumber}">SE1</td>
+                                    <td>
+                                        <div style="font-weight: 600;" th:text="${ticket.passengerName}">Nguyen Van A</div>
+                                        <span style="font-size: 11px; color: var(--text-muted);" th:text="${'ID: ' + ticket.passengerIdCard}">ID: 12345678</span>
+                                    </td>
+                                    <td th:text="${'Car: ' + ticket.carriageNumber + ', Seat: ' + ticket.seatNumber}">Car 1, Seat 1</td>
+                                    <td th:text="${ticket.quantity}">1</td>
+                                    <td th:text="${#numbers.formatDecimal(ticket.totalPrice, 0, 'COMMA', 0, 'POINT') + ' ₫'}">0 ₫</td>
+                                    <td>
+                                        <span class="badge" th:classappend="${ticket.status.name() == 'BOOKED' ? 'badge-success' : 'badge-danger'}" th:text="${ticket.status}">BOOKED</span>
+                                    </td>
+                                    <td>
+                                        <div style="display: flex; justify-content: flex-end;" th:if="${ticket.status.name() == 'BOOKED'}">
+                                            <form th:action="@{/tickets/cancel/{id}(id=${ticket.id})}" method="post" onsubmit="return confirm('Cancel this ticket booking?')">
+                                                <button type="submit" class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;">Cancel Booking</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer th:replace="~{layout/main :: footer}"></footer>
+    
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

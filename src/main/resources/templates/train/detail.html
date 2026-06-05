@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout/main :: head('Chi Tiết Chuyến Tàu - ' + train.trainNumber)}"></head>
+<body>
+
+    <header th:replace="~{layout/main :: navbar}"></header>
+    
+    <div th:replace="~{layout/main :: toasts}"></div>
+
+    <main>
+        <div class="event-detail-container">
+            <!-- Train route main panel -->
+            <div>
+                <div class="detail-train-header glass-card">
+                    <div class="train-route-visual">
+                        <div class="route-station">
+                            <span class="lbl">DEPARTURE</span>
+                            <h2 th:text="${train.departureStation}">Hà Nội</h2>
+                            <p th:text="${#temporals.format(train.departureDate, 'EEEE, dd MMM yyyy')}">Date</p>
+                            <p class="time-highlight" th:text="${#temporals.format(train.departureTime, 'HH:mm')}">19:00</p>
+                        </div>
+                        
+                        <div class="route-connector">
+                            <span class="train-code-badge" th:text="${train.trainNumber}">SE1</span>
+                            <div class="connector-line-anim"></div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="connector-train-icon">
+                                <rect x="4" y="3" width="16" height="16" rx="2"/>
+                                <path d="M4 11h16"/>
+                                <path d="M12 3v8"/>
+                            </svg>
+                        </div>
+
+                        <div class="route-station">
+                            <span class="lbl">ARRIVAL</span>
+                            <h2 th:text="${train.arrivalStation}">Sài Gòn</h2>
+                            <p>Next Days</p>
+                            <p class="time-highlight">-:-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card" style="margin-top: 24px; padding: 24px;">
+                    <h3 style="margin-bottom: 12px; font-size: 20px;">Railway Information</h3>
+                    <p class="detail-description">This train route is operated under national railways standards. Standard coaches include comfortable soft seats, clean cabins, air conditioning, and food services. Please arrive 30 minutes before departure for security and boarding checks.</p>
+                </div>
+                
+                <div class="glass-card" style="margin-top: 24px; padding: 20px; display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="avatar-mockup" style="width: 48px; height: 48px; margin: 0; font-size: 18px;" th:text="${#strings.substring(train.seller.username, 0, 1).toUpperCase()}">S</div>
+                        <div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">OPERATED BY</div>
+                            <strong th:text="${train.seller.username}">Operator name</strong>
+                        </div>
+                    </div>
+                    <span class="user-role-badge">Official Railway Operator</span>
+                </div>
+            </div>
+
+            <!-- Ticket booking panel -->
+            <div class="booking-card glass-card">
+                <h3 class="booking-title">Book Tickets</h3>
+                
+                <div class="booking-price-row">
+                    <span>Fare Per Ticket</span>
+                    <span class="booking-price-value" th:text="${train.price > 0 ? #numbers.formatDecimal(train.price, 0, 'COMMA', 0, 'POINT') + ' ₫' : 'Free'}">0 ₫</span>
+                </div>
+
+                <div class="booking-price-row">
+                    <span>Seats Available</span>
+                    <span style="font-weight: 600; color: var(--text-primary);" th:text="${train.availableSeats + ' / ' + train.totalSeats}">10 / 100</span>
+                </div>
+
+                <!-- Booking form -->
+                <form th:action="@{/tickets/book/{id}(id=${train.id})}" method="post" th:if="${train.availableSeats > 0}">
+                    <!-- Hidden field to pass to javascript calculator -->
+                    <input type="hidden" id="ticket-price" th:value="${train.price}">
+
+                    <div class="booking-form-group">
+                        <label for="booking-quantity">Select Quantity</label>
+                        <select id="booking-quantity" name="quantity" class="form-select">
+                            <option th:each="i : ${#numbers.sequence(1, T(java.lang.Math).min(10, train.availableSeats))}" th:value="${i}" th:text="${i + ' Ticket(s)'}"></option>
+                        </select>
+                    </div>
+
+                    <!-- Passenger metadata inputs -->
+                    <div class="booking-form-group">
+                        <label for="passengerName">Passenger Name</label>
+                        <input type="text" id="passengerName" name="passengerName" class="form-input" placeholder="Full name of passenger" required>
+                    </div>
+
+                    <div class="booking-form-group">
+                        <label for="passengerIdCard">ID Card / Passport</label>
+                        <input type="text" id="passengerIdCard" name="passengerIdCard" class="form-input" placeholder="ID Number / Passport Number" required>
+                    </div>
+
+                    <div class="booking-total-row">
+                        <span>Total Price</span>
+                        <span id="booking-total-value" class="booking-total-value">0 ₫</span>
+                    </div>
+
+                    <!-- Button conditional on role -->
+                    <div sec:authorize="isAnonymous()">
+                        <a th:href="@{/login}" class="btn btn-primary" style="width: 100%;">Sign In to Book</a>
+                    </div>
+                    
+                    <div sec:authorize="hasRole('ROLE_BUYER')">
+                        <button type="submit" class="btn btn-accent" style="width: 100%;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+                                <line x1="3" x2="21" y1="9" y2="9"/>
+                                <line x1="9" x2="9" y1="21" y2="9"/>
+                            </svg>
+                            Confirm & Reserve Seats
+                        </button>
+                    </div>
+
+                    <div sec:authorize="hasAnyRole('ROLE_SELLER', 'ROLE_ADMIN')">
+                        <button type="button" class="btn btn-secondary" style="width: 100%; cursor: not-allowed;" disabled>
+                            Operators/Admins Cannot Buy
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Sold out state -->
+                <div th:if="${train.availableSeats <= 0}" style="text-align: center; margin-top: 20px;">
+                    <div class="badge badge-danger" style="width: 100%; padding: 14px; border-radius: 10px; font-size: 14px;">
+                        ALL SEATS BOOKED
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 13px; margin-top: 8px;">Sorry, this train has no available seats left.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer th:replace="~{layout/main :: footer}"></footer>
+    
+    <script>
+        // Custom js to compute live pricing based on quantity
+        const quantitySelect = document.getElementById('booking-quantity');
+        const priceVal = parseFloat(document.getElementById('ticket-price').value);
+        const totalDisplay = document.getElementById('booking-total-value');
+        
+        function updatePrice() {
+            if (quantitySelect) {
+                const qty = parseInt(quantitySelect.value);
+                const total = qty * priceVal;
+                totalDisplay.innerText = new Intl.NumberFormat('vi-VN').format(total) + ' ₫';
+            }
+        }
+        
+        if (quantitySelect) {
+            quantitySelect.addEventListener('change', updatePrice);
+            updatePrice();
+        }
+    </script>
+</body>
+</html>
