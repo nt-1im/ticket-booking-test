@@ -23,16 +23,16 @@
             </a>
             
             <ul class="nav-links">
-                <li><a th:href="@{/}" th:classappend="${#request.requestURI == '/' ? 'active-link' : ''}">Trains</a></li>
+                <li><a th:href="@{/}" th:classappend="${requestURI == '/' ? 'active-link' : ''}">Trains</a></li>
                 
                 <!-- If logged in, show Dashboard link -->
                 <li sec:authorize="isAuthenticated()">
-                    <a th:href="@{/dashboard}" th:classappend="${#request.requestURI.startsWith('/dashboard') ? 'active-link' : ''}">Dashboard</a>
+                    <a th:href="@{/dashboard}" th:classappend="${requestURI != null && requestURI.startsWith('/dashboard') ? 'active-link' : ''}">Dashboard</a>
                 </li>
                 
                 <!-- If Admin, show User Admin link -->
                 <li sec:authorize="hasRole('ADMIN')">
-                    <a th:href="@{/dashboard/admin}" th:classappend="${#request.requestURI == '/dashboard/admin' ? 'active-link' : ''}">Admin Panel</a>
+                    <a th:href="@{/dashboard/admin}" th:classappend="${requestURI == '/dashboard/admin' ? 'active-link' : ''}">Admin Panel</a>
                 </li>
 
                 <!-- If Authenticated, show Profile & Logout -->

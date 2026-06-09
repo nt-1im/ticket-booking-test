@@ -3,7 +3,7 @@ services:
     image: mysql:8.0
     container_name: ticket-mysql
     ports:
-      - "3306:3306"
+      - "3307:3306"
     environment:
       MYSQL_DATABASE: ticketdb
       MYSQL_ROOT_PASSWORD: root
@@ -21,6 +21,21 @@ services:
       PMA_PASSWORD: root
     depends_on:
       - mysql
+
+  web:
+    build: .
+    container_name: ticket-app
+    ports:
+      - "8082:8080"
+    environment:
+      PORT: 8080
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ticketdb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    depends_on:
+      - mysql
+    restart: on-failure
 
 volumes:
   mysql_data:

@@ -13,18 +13,32 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * Controller xu ly cac yeu cau lien quan den dat va huy ve tau.
+ */
 @Controller
 public class TicketController {
 
     private final TicketService ticketService;
     private final UserService userService;
 
+    /**
+     * Ham khoi dung TicketController.
+     *
+     * @param ticketService Dich vu quan ly ve tau
+     * @param userService Dich vu quan ly nguoi dung
+     */
     @Autowired
     public TicketController(TicketService ticketService, UserService userService) {
         this.ticketService = ticketService;
         this.userService = userService;
     }
 
+    /**
+     * Helper method de lay thong tin tai khoan nguoi dung dang dang nhap.
+     *
+     * @return Doi tuong User hoac null neu chua xac thuc
+     */
     private User getAuthenticatedUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
@@ -33,6 +47,16 @@ public class TicketController {
         return (User) userService.loadUserByUsername(auth.getName());
     }
 
+    /**
+     * Xu ly gui yeu cau dat ve tau.
+     *
+     * @param trainId ID cua chuyen tau can dat ve
+     * @param quantity So luong ve muon dat
+     * @param passengerName Ho ten hanh khach di tau
+     * @param passengerIdCard So CMND/CCCD cua hanh khach
+     * @param redirectAttributes Luu thong bao dat ve thanh cong hoac loi de hien thi sau khi chuyen huong
+     * @return Chuyen huong toi trang Dashboard nguoi mua neu thanh cong, nguoc lai quay ve trang chi tiet chuyen tau
+     */
     @PostMapping("/tickets/book/{trainId}")
     public String bookTicket(@PathVariable("trainId") Long trainId,
                              @RequestParam("quantity") int quantity,
@@ -52,6 +76,14 @@ public class TicketController {
         }
     }
 
+    /**
+     * Xu ly yeu cau huy ve tau da dat.
+     * Tra lai so ghe trong va cap nhat trang thai ve thanh CANCELLED.
+     *
+     * @param ticketId ID cua ve can huy
+     * @param redirectAttributes Luu thong bao ket qua thao tac huy ve
+     * @return Chuyen huong ve Dashboard tuong ung dua tren vai tro cua nguoi dung thuc hien huy ve
+     */
     @PostMapping("/tickets/cancel/{ticketId}")
     public String cancelTicket(@PathVariable("ticketId") Long ticketId,
                                RedirectAttributes redirectAttributes) {
@@ -65,7 +97,7 @@ public class TicketController {
             redirectAttributes.addFlashAttribute("errorMessage", "Cancellation failed: " + e.getMessage());
         }
 
-        // Redirect based on role
+        // Dieu huong sau khi huy dua tren vai tro nguoi dung
         if (currentUser.getRole().name().equals("ROLE_ADMIN")) {
             return "redirect:/dashboard/admin";
         }

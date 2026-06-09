@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout/main :: head(${isEdit} ? 'Edit Train Timetable' : 'Create Train Timetable')}"></head>
+<head th:replace="~{layout/main :: head(${isEdit == true} ? 'Edit Train Timetable' : 'Create Train Timetable')}"></head>
 <body>
 
     <header th:replace="~{layout/main :: navbar}"></header>
@@ -9,7 +9,7 @@
 
     <main style="max-width: 800px;">
         <div class="glass-card">
-            <h2 class="events-section-title" th:text="${isEdit} ? 'Edit Train Route Details' : 'Create New Train Route'">Create New Train Route</h2>
+            <h2 class="events-section-title" th:text="${isEdit == true} ? 'Edit Train Route Details' : 'Create New Train Route'">Create New Train Route</h2>
             <p style="color: var(--text-secondary); margin-bottom: 30px;">
                 Enter information about the train number, departure/arrival stations, times, prices, and seats capacity.
             </p>
@@ -19,7 +19,7 @@
             </div>
 
             <!-- Set correct action URL for Thymeleaf depending on mode -->
-            <form th:action="${isEdit} ? @{/trains/edit/{id}(id=${train.id})} : @{/trains/new}" th:object="${train}" method="post">
+            <form th:action="${isEdit == true} ? @{/trains/edit/{id}(id=${train.id})} : @{/trains/new}" th:object="${train}" method="post">
                 
                 <div class="form-grid">
                     <div class="form-group">
@@ -71,7 +71,7 @@
 
                 <div style="display: flex; gap: 16px; margin-top: 30px; justify-content: flex-end;">
                     <a th:href="@{/dashboard/seller}" class="btn btn-secondary">Cancel</a>
-                    <button type="submit" class="btn btn-primary" th:text="${isEdit} ? 'Save Changes' : 'Publish Timetable'">
+                    <button type="submit" class="btn btn-primary" th:text="${isEdit == true} ? 'Save Changes' : 'Publish Timetable'">
                         Publish Timetable
                     </button>
                 </div>

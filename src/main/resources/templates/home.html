@@ -57,7 +57,7 @@
 
         <!-- Trains Section -->
         <section style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
-            <h2 class="events-section-title" th:text="${isSearch ? 'Search Results' : 'Available Train Schedules'}">Available Train Schedules</h2>
+            <h2 class="events-section-title" th:text="${isSearch == true ? 'Search Results' : 'Available Train Schedules'}">Available Train Schedules</h2>
             
             <!-- Empty state if no trains found -->
             <div th:if="${trains.isEmpty()}" class="glass-card" style="text-align: center; padding: 60px 20px;">
