@@ -62,6 +62,8 @@ class TicketBookingApplicationTests {
 				"Saigon",
 				LocalDate.now().plusDays(10),
 				LocalTime.of(12, 0),
+				LocalDate.now().plusDays(11),
+				LocalTime.of(4, 0),
 				500000.0,
 				5,
 				seller);

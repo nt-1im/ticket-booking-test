@@ -59,7 +59,7 @@ public class TicketController {
      */
     @PostMapping("/tickets/book/{trainId}")
     public String bookTicket(@PathVariable("trainId") Long trainId,
-                             @RequestParam("quantity") int quantity,
+                             @RequestParam("selectedSeats") java.util.List<Integer> selectedSeats,
                              @RequestParam("passengerName") String passengerName,
                              @RequestParam("passengerIdCard") String passengerIdCard,
                              RedirectAttributes redirectAttributes) {
@@ -67,8 +67,13 @@ public class TicketController {
         if (currentUser == null) return "redirect:/login";
 
         try {
-            Ticket ticket = ticketService.bookTicket(trainId, currentUser, quantity, passengerName, passengerIdCard);
-            redirectAttributes.addFlashAttribute("successMessage", "Train ticket booked successfully! Carriage: " + ticket.getCarriageNumber() + ", Seat: " + ticket.getSeatNumber());
+            java.util.List<Ticket> tickets = ticketService.bookTicketWithSeats(trainId, currentUser, selectedSeats, passengerName, passengerIdCard);
+            StringBuilder sb = new StringBuilder("Train ticket(s) booked successfully! ");
+            for (Ticket ticket : tickets) {
+                sb.append("Carriage: ").append(ticket.getCarriageNumber())
+                  .append(", Seat: ").append(ticket.getSeatNumber()).append("; ");
+            }
+            redirectAttributes.addFlashAttribute("successMessage", sb.toString());
             return "redirect:/dashboard/buyer";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Booking failed: " + e.getMessage());

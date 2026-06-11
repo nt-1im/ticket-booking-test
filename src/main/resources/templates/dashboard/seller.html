@@ -88,7 +88,16 @@
                                     <span style="color: var(--text-muted); margin: 0 4px;">&rarr;</span>
                                     <strong th:text="${train.arrivalStation}">Saigon</strong>
                                 </td>
-                                <td th:text="${#temporals.format(train.departureDate, 'dd MMM yyyy') + ' at ' + #temporals.format(train.departureTime, 'HH:mm')}">Date / Time</td>
+                                <td>
+                                    <div>
+                                        <span style="color: var(--text-secondary); font-size: 11px;">DEP:</span>
+                                        <span th:text="${#temporals.format(train.departureDate, 'dd MMM yyyy') + ' ' + #temporals.format(train.departureTime, 'HH:mm')}">Date / Time</span>
+                                    </div>
+                                    <div th:if="${train.arrivalDate != null}">
+                                        <span style="color: var(--text-secondary); font-size: 11px;">ARR:</span>
+                                        <span th:text="${#temporals.format(train.arrivalDate, 'dd MMM yyyy') + ' ' + #temporals.format(train.arrivalTime, 'HH:mm')}">Date / Time</span>
+                                    </div>
+                                </td>
                                 <td th:text="${train.price > 0 ? #numbers.formatDecimal(train.price, 0, 'COMMA', 0, 'POINT') + ' ₫' : 'Free'}">0 ₫</td>
                                 <td th:text="${train.availableSeats + ' / ' + train.totalSeats}">0/0</td>
                                 <td>

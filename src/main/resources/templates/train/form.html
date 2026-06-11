@@ -63,6 +63,20 @@
                     </div>
                 </div>
 
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="arrivalDate">Arrival Date</label>
+                        <input type="date" id="arrivalDate" th:field="*{arrivalDate}" class="form-input" required>
+                        <div class="field-error" th:if="${#fields.hasErrors('arrivalDate')}" th:errors="*{arrivalDate}">Arrival Date Error</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="arrivalTime">Arrival Time</label>
+                        <input type="time" id="arrivalTime" th:field="*{arrivalTime}" class="form-input" required>
+                        <div class="field-error" th:if="${#fields.hasErrors('arrivalTime')}" th:errors="*{arrivalTime}">Arrival Time Error</div>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label for="totalSeats">Total Capacity (Seats)</label>
                     <input type="number" min="1" id="totalSeats" th:field="*{totalSeats}" class="form-input" placeholder="e.g. 100" required>

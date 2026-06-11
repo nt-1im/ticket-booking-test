@@ -13,7 +13,7 @@ WORKDIR /app
 COPY --from=build /app/target/ticket-booking-0.0.1-SNAPSHOT.jar app.jar
 
 # Render exposes PORT environment variable which we bind to server.port
-ENV PORT=8080
-EXPOSE 8080
+ENV PORT=8085
+EXPOSE 8085
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

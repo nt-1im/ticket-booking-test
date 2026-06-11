@@ -109,9 +109,9 @@
                         </div>
 
                         <div class="station-block arrival">
-                            <span class="station-time">-:-</span>
+                            <span class="station-time" th:text="${train.arrivalTime != null ? #temporals.format(train.arrivalTime, 'HH:mm') : '-:-'}">05:00</span>
                             <span class="station-name" th:text="${train.arrivalStation}">Sài Gòn</span>
-                            <span class="station-date">Next Days</span>
+                            <span class="station-date" th:text="${train.arrivalDate != null ? #temporals.format(train.arrivalDate, 'dd MMM yyyy') : 'Next Days'}">Next Days</span>
                         </div>
                     </div>
 

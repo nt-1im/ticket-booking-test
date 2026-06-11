@@ -14,30 +14,35 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Controller xu ly cac yeu cau trang chu cong khai (Home Page) va hien thi thong tin chuyen tau.
+ * Controller xu ly cac yeu cau trang chu cong khai (Home Page) va hien thi
+ * thong tin chuyen tau.
  */
 @Controller
 public class HomeController {
 
     private final TrainService trainService;
+    private final com.example.ticketbooking.service.TicketService ticketService;
 
     /**
      * Ham khoi dung HomeController.
      *
-     * @param trainService Dich vu quan ly chuyen tau
+     * @param trainService  Dich vu quan ly chuyen tau
+     * @param ticketService Dich vu quan ly ve tau
      */
     @Autowired
-    public HomeController(TrainService trainService) {
+    public HomeController(TrainService trainService, com.example.ticketbooking.service.TicketService ticketService) {
         this.trainService = trainService;
+        this.ticketService = ticketService;
     }
 
     /**
-     * Hien thi trang chu va ho tro tim kiem dong cac chuyen tau theo ga di, ga den va ngay khoi hanh.
+     * Hien thi trang chu va ho tro tim kiem dong cac chuyen tau theo ga di, ga den
+     * va ngay khoi hanh.
      *
      * @param departure Ga di (Khong bat buoc)
-     * @param arrival Ga den (Khong bat buoc)
-     * @param date Ngay khoi hanh chuyen tau (Khong bat buoc)
-     * @param model Doi tuong chua du lieu de truyen sang Thymeleaf template
+     * @param arrival   Ga den (Khong bat buoc)
+     * @param date      Ngay khoi hanh chuyen tau (Khong bat buoc)
+     * @param model     Doi tuong chua du lieu de truyen sang Thymeleaf template
      * @return Ten template hien thi trang chu ("home")
      */
     @GetMapping("/")
@@ -65,16 +70,18 @@ public class HomeController {
     /**
      * Hien thi trang chi tiet cua mot chuyen tau cu the.
      *
-     * @param id ID cua chuyen tau can xem
+     * @param id    ID cua chuyen tau can xem
      * @param model Doi tuong chua du lieu de truyen sang Thymeleaf template
      * @return Ten template hien thi chi tiet chuyen tau ("train/detail")
-     * @throws IllegalArgumentException Nem ra khi ID chuyen tau khong hop le hoac khong ton tai
+     * @throws IllegalArgumentException Nem ra khi ID chuyen tau khong hop le hoac
+     *                                  khong ton tai
      */
     @GetMapping("/trains/detail/{id}")
     public String trainDetail(@PathVariable("id") Long id, Model model) {
         Train train = trainService.getTrainById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid train ID: " + id));
         model.addAttribute("train", train);
+        model.addAttribute("occupiedSeats", ticketService.getOccupiedSeats(id));
         return "train/detail";
     }
 }

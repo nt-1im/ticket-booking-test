@@ -195,5 +195,91 @@ public class TicketService {
         ticket.setStatus(Ticket.Status.CANCELLED);
         ticketRepository.save(ticket);
     }
+
+    /**
+     * Lay danh sach cac ghe da duoc dat (chi so tuyet doi tu 1 den totalSeats) tren chuyen tau.
+     */
+    public List<Integer> getOccupiedSeats(Long trainId) {
+        Train train = trainRepository.findById(trainId)
+                .orElseThrow(() -> new IllegalArgumentException("Train not found with ID: " + trainId));
+        List<Ticket> activeTickets = ticketRepository.findByTrainId(trainId).stream()
+                .filter(t -> t.getStatus() == Ticket.Status.BOOKED)
+                .toList();
+
+        List<Integer> occupied = new java.util.ArrayList<>();
+        for (Ticket t : activeTickets) {
+            int ticketStartIdx = (t.getCarriageNumber() - 1) * 10 + t.getSeatNumber();
+            for (int i = 0; i < t.getQuantity(); i++) {
+                int idx = ticketStartIdx + i;
+                if (idx <= train.getTotalSeats()) {
+                    occupied.add(idx);
+                }
+            }
+        }
+        return occupied;
+    }
+
+    /**
+     * Dat cac ghe duoc chon tren tau cho khach hang.
+     */
+    @Transactional
+    public List<Ticket> bookTicketWithSeats(Long trainId, User buyer, List<Integer> selectedSeats, String passengerName, String passengerIdCard) {
+        if (selectedSeats == null || selectedSeats.isEmpty()) {
+            throw new IllegalArgumentException("At least one seat must be selected");
+        }
+        if (passengerName == null || passengerName.isBlank()) {
+            throw new IllegalArgumentException("Passenger name is required");
+        }
+        if (passengerIdCard == null || passengerIdCard.isBlank()) {
+            throw new IllegalArgumentException("Passenger ID Card / Passport is required");
+        }
+
+        // Tim kiem va ap dung khoa ghi bi quan
+        Train train = trainRepository.findByIdForUpdate(trainId)
+                .orElseThrow(() -> new IllegalArgumentException("Train not found with ID: " + trainId));
+
+        int quantity = selectedSeats.size();
+        if (train.getAvailableSeats() < quantity) {
+            throw new IllegalArgumentException("Not enough seats available! Only " + train.getAvailableSeats() + " left.");
+        }
+
+        // Kiem tra tung ghe xem co bi dat trung hoac vuot qua so ghe thiet ke khong
+        List<Integer> occupied = getOccupiedSeats(trainId);
+        for (Integer seatIdx : selectedSeats) {
+            if (seatIdx < 1 || seatIdx > train.getTotalSeats()) {
+                throw new IllegalArgumentException("Invalid seat selection: " + seatIdx);
+            }
+            if (occupied.contains(seatIdx)) {
+                throw new IllegalArgumentException("Seat " + seatIdx + " is already booked.");
+            }
+        }
+
+        // Tao rieng biet tung ve co quantity = 1 cho tung cho ngoi duoc dat
+        List<Ticket> bookedTickets = new java.util.ArrayList<>();
+        double pricePerSeat = train.getPrice();
+        for (Integer seatIdx : selectedSeats) {
+            int carriageNumber = (seatIdx - 1) / 10 + 1;
+            int seatNumber = (seatIdx - 1) % 10 + 1;
+
+            Ticket ticket = new Ticket(
+                train,
+                buyer,
+                passengerName,
+                passengerIdCard,
+                carriageNumber,
+                seatNumber,
+                1,
+                pricePerSeat,
+                LocalDateTime.now()
+            );
+            bookedTickets.add(ticketRepository.save(ticket));
+        }
+
+        // Giam bot so ghe trong tren chuyen tau
+        train.setAvailableSeats(train.getAvailableSeats() - quantity);
+        trainRepository.save(train);
+
+        return bookedTickets;
+    }
 }
 

@@ -99,6 +99,8 @@ public class TrainService {
         existingTrain.setArrivalStation(updatedTrain.getArrivalStation());
         existingTrain.setDepartureDate(updatedTrain.getDepartureDate());
         existingTrain.setDepartureTime(updatedTrain.getDepartureTime());
+        existingTrain.setArrivalDate(updatedTrain.getArrivalDate());
+        existingTrain.setArrivalTime(updatedTrain.getArrivalTime());
         existingTrain.setPrice(updatedTrain.getPrice());
 
         int diffSeats = updatedTrain.getTotalSeats() - existingTrain.getTotalSeats();

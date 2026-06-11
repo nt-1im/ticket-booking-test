@@ -78,7 +78,7 @@
                                 <div>
                                     <div style="color: var(--text-secondary); font-size: 10px; text-align: right;">ARRIVAL</div>
                                     <strong th:text="${ticket.train.arrivalStation}" style="font-size: 18px; color: var(--text-primary); display: block; text-align: right;">Sài Gòn</strong>
-                                    <div style="font-size: 13px; color: var(--text-muted); text-align: right;">Next Days</div>
+                                    <div th:text="${ticket.train.arrivalDate != null && ticket.train.arrivalTime != null ? #temporals.format(ticket.train.arrivalDate, 'dd MMM yyyy') + ' ' + #temporals.format(ticket.train.arrivalTime, 'HH:mm') : 'Next Days'}" style="font-size: 13px; color: var(--text-muted); text-align: right;">Next Days</div>
                                 </div>
                             </div>
                             

@@ -33,8 +33,8 @@
                         <div class="route-station">
                             <span class="lbl">ARRIVAL</span>
                             <h2 th:text="${train.arrivalStation}">Sài Gòn</h2>
-                            <p>Next Days</p>
-                            <p class="time-highlight">-:-</p>
+                            <p th:text="${train.arrivalDate != null ? #temporals.format(train.arrivalDate, 'EEEE, dd MMM yyyy') : 'Next Days'}">Date</p>
+                            <p class="time-highlight" th:text="${train.arrivalTime != null ? #temporals.format(train.arrivalTime, 'HH:mm') : '-:-'}">05:00</p>
                         </div>
                     </div>
                 </div>
@@ -71,15 +71,51 @@
                 </div>
 
                 <!-- Booking form -->
-                <form th:action="@{/tickets/book/{id}(id=${train.id})}" method="post" th:if="${train.availableSeats > 0}">
-                    <!-- Hidden field to pass to javascript calculator -->
+                <form th:action="@{/tickets/book/{id}(id=${train.id})}" method="post" th:if="${train.availableSeats > 0}" id="bookingForm">
+                    <!-- Hidden fields to pass parameters -->
                     <input type="hidden" id="ticket-price" th:value="${train.price}">
+                    <input type="hidden" id="train-total-seats" th:value="${train.totalSeats}">
+                    <input type="hidden" name="selectedSeats" id="selected-seats-input" required>
 
-                    <div class="booking-form-group">
-                        <label for="booking-quantity">Select Quantity</label>
-                        <select id="booking-quantity" name="quantity" class="form-select">
-                            <option th:each="i : ${#numbers.sequence(1, T(java.lang.Math).min(10, train.availableSeats))}" th:value="${i}" th:text="${i + ' Ticket(s)'}"></option>
-                        </select>
+                    <!-- Interactive Seat Selector -->
+                    <div class="seat-map-section">
+                        <h4 class="seat-map-title">Select Desired Seats</h4>
+                        
+                        <!-- Carriage tabs -->
+                        <div class="carriage-tabs" id="carriageTabs">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+
+                        <!-- Seat Grid -->
+                        <div class="seat-grid-container">
+                            <div class="seat-grid" id="seatGrid">
+                                <!-- Populated dynamically by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Seat legends -->
+                        <div class="seat-legend">
+                            <div class="legend-item">
+                                <div class="legend-dot available"></div>
+                                <span>Available</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot occupied"></div>
+                                <span>Occupied</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot selected"></div>
+                                <span>Selected</span>
+                            </div>
+                        </div>
+
+                        <!-- Selected Seats Summary -->
+                        <div class="selected-summary-box">
+                            <span style="font-size: 11px; color: var(--text-secondary); display: block; font-weight: 600; text-transform: uppercase;">Selected Seats</span>
+                            <div class="selected-seats-list" id="selectedSeatsList">
+                                <span style="font-size: 12px; color: var(--text-muted);">No seats selected yet.</span>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Passenger metadata inputs -->
@@ -104,7 +140,7 @@
                     </div>
                     
                     <div sec:authorize="hasRole('ROLE_BUYER')">
-                        <button type="submit" class="btn btn-accent" style="width: 100%;">
+                        <button type="submit" id="submitBtn" class="btn btn-accent" style="width: 100%;" disabled>
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
                                 <line x1="3" x2="21" y1="9" y2="9"/>
@@ -134,23 +170,124 @@
 
     <footer th:replace="~{layout/main :: footer}"></footer>
     
-    <script>
-        // Custom js to compute live pricing based on quantity
-        const quantitySelect = document.getElementById('booking-quantity');
-        const priceVal = parseFloat(document.getElementById('ticket-price').value);
-        const totalDisplay = document.getElementById('booking-total-value');
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const occupiedSeats = /*[[${occupiedSeats}]]*/ [];
+        /*]]>*/
         
-        function updatePrice() {
-            if (quantitySelect) {
-                const qty = parseInt(quantitySelect.value);
-                const total = qty * priceVal;
-                totalDisplay.innerText = new Intl.NumberFormat('vi-VN').format(total) + ' ₫';
+        const priceVal = parseFloat(document.getElementById('ticket-price').value);
+        const totalSeats = parseInt(document.getElementById('train-total-seats').value);
+        const numCarriages = Math.ceil(totalSeats / 10);
+        
+        let activeCarriage = 1;
+        const selectedSeats = [];
+
+        const carriageTabs = document.getElementById('carriageTabs');
+        const seatGrid = document.getElementById('seatGrid');
+        const selectedSeatsInput = document.getElementById('selected-seats-input');
+        const selectedSeatsList = document.getElementById('selectedSeatsList');
+        const totalDisplay = document.getElementById('booking-total-value');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Render carriage tabs
+        function renderCarriageTabs() {
+            if (!carriageTabs) return;
+            carriageTabs.innerHTML = '';
+            for (let i = 1; i <= numCarriages; i++) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `carriage-tab-btn ${i === activeCarriage ? 'active' : ''}`;
+                btn.innerText = `Coach ${i}`;
+                btn.addEventListener('click', () => {
+                    activeCarriage = i;
+                    renderCarriageTabs();
+                    renderSeats();
+                });
+                carriageTabs.appendChild(btn);
             }
         }
-        
-        if (quantitySelect) {
-            quantitySelect.addEventListener('change', updatePrice);
-            updatePrice();
+
+        // Render seats in active carriage
+        function renderSeats() {
+            if (!seatGrid) return;
+            seatGrid.innerHTML = '';
+            const seatOffset = (activeCarriage - 1) * 10;
+            
+            for (let i = 1; i <= 10; i++) {
+                const seatIdx = seatOffset + i;
+                if (seatIdx > totalSeats) break;
+                
+                const seatNode = document.createElement('div');
+                seatNode.innerText = i;
+                
+                if (occupiedSeats && occupiedSeats.includes(seatIdx)) {
+                    seatNode.className = 'seat occupied';
+                    seatNode.title = `Seat ${seatIdx} is already booked`;
+                } else if (selectedSeats.includes(seatIdx)) {
+                    seatNode.className = 'seat selected';
+                    seatNode.addEventListener('click', () => toggleSeat(seatIdx));
+                } else {
+                    seatNode.className = 'seat available';
+                    seatNode.addEventListener('click', () => toggleSeat(seatIdx));
+                }
+                seatGrid.appendChild(seatNode);
+            }
+        }
+
+        // Toggle seat selection
+        function toggleSeat(seatIdx) {
+            const index = selectedSeats.indexOf(seatIdx);
+            if (index > -1) {
+                selectedSeats.splice(index, 1);
+            } else {
+                if (selectedSeats.length >= 10) {
+                    alert('You can select a maximum of 10 seats per booking.');
+                    return;
+                }
+                selectedSeats.push(seatIdx);
+            }
+            updateSelection();
+            renderSeats();
+        }
+
+        // Update summaries and pricing
+        function updateSelection() {
+            if (selectedSeatsInput) {
+                selectedSeatsInput.value = selectedSeats.join(',');
+            }
+            
+            if (selectedSeatsList) {
+                selectedSeatsList.innerHTML = '';
+                if (selectedSeats.length === 0) {
+                    selectedSeatsList.innerHTML = '<span style="font-size: 12px; color: var(--text-muted);">No seats selected yet.</span>';
+                } else {
+                    const sorted = [...selectedSeats].sort((a,b) => a-b);
+                    sorted.forEach(seatIdx => {
+                        const coach = Math.floor((seatIdx - 1) / 10) + 1;
+                        const seat = (seatIdx - 1) % 10 + 1;
+                        const badge = document.createElement('span');
+                        badge.className = 'selected-seat-badge';
+                        badge.innerText = `C${coach}-S${seat}`;
+                        selectedSeatsList.appendChild(badge);
+                    });
+                }
+            }
+
+            const total = selectedSeats.length * priceVal;
+            if (totalDisplay) {
+                totalDisplay.innerText = new Intl.NumberFormat('vi-VN').format(total) + ' ₫';
+            }
+
+            if (submitBtn) {
+                submitBtn.disabled = selectedSeats.length === 0;
+            }
+        }
+
+        // Initialize
+        if (carriageTabs && seatGrid) {
+            renderCarriageTabs();
+            renderSeats();
+            updateSelection();
         }
     </script>
 </body>

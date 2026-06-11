@@ -125,7 +125,14 @@
                                 <tr th:each="train : ${trains}">
                                     <td>
                                         <div style="font-weight: 700; color: var(--secondary);" th:text="${train.trainNumber}">SE1</div>
-                                        <span style="font-size: 11px; color: var(--text-muted);" th:text="${#temporals.format(train.departureDate, 'dd MMM yyyy') + ' at ' + #temporals.format(train.departureTime, 'HH:mm')}">Date / Time</span>
+                                        <div>
+                                            <span style="font-size: 11px; color: var(--text-muted);">DEP:</span>
+                                            <span style="font-size: 11px; color: var(--text-primary);" th:text="${#temporals.format(train.departureDate, 'dd MMM yyyy') + ' ' + #temporals.format(train.departureTime, 'HH:mm')}">Date / Time</span>
+                                        </div>
+                                        <div th:if="${train.arrivalDate != null}">
+                                            <span style="font-size: 11px; color: var(--text-muted);">ARR:</span>
+                                            <span style="font-size: 11px; color: var(--text-primary);" th:text="${#temporals.format(train.arrivalDate, 'dd MMM yyyy') + ' ' + #temporals.format(train.arrivalTime, 'HH:mm')}">Date / Time</span>
+                                        </div>
                                     </td>
                                     <td>
                                         <strong th:text="${train.departureStation}">Hanoi</strong>

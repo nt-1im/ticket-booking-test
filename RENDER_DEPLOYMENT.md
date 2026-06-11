@@ -56,7 +56,7 @@ This guide outlines step-by-step instructions to deploy the RailPass Spring Boot
    | Key | Value | Description |
    | :--- | :--- | :--- |
    | `SPRING_PROFILES_ACTIVE` | `prod` | Activates the MySQL database configuration |
-   | `SPRING_DATASOURCE_URL` | `jdbc:mysql://YOUR_DB_HOST:YOUR_DB_PORT/YOUR_DB_NAME?useSSL=false&serverTimezone=UTC` | Your MySQL JDBC connection string |
+   | `SPRING_DATASOURCE_URL` | `jdbc:mysql://YOUR_DB_HOST:YOUR_DB_PORT/YOUR_DB_NAME?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true` | Your MySQL JDBC connection string |
    | `SPRING_DATASOURCE_USERNAME` | `YOUR_DB_USERNAME` | Your MySQL database username |
    | `SPRING_DATASOURCE_PASSWORD` | `YOUR_DB_PASSWORD` | Your MySQL database password |
 

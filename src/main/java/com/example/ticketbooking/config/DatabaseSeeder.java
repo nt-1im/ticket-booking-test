@@ -14,7 +14,8 @@ import java.time.LocalTime;
 
 /**
  * Lop khoi tao du lieu ban dau cho co so du lieu (Database Seeder).
- * Tu dong chay khi ung dung khoi hanh nho trien khai giao dien `CommandLineRunner`.
+ * Tu dong chay khi ung dung khoi hanh nho trien khai giao dien
+ * `CommandLineRunner`.
  */
 @Component
 public class DatabaseSeeder implements CommandLineRunner {
@@ -25,7 +26,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     /**
      * Ham khoi dung DatabaseSeeder voi cac Dependency Injection can thiet.
      *
-     * @param userService Dich vu quan ly nguoi dung
+     * @param userService     Dich vu quan ly nguoi dung
      * @param trainRepository Kho luu tru thong tin chuyen tau
      */
     @Autowired
@@ -36,7 +37,8 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     /**
      * Phuong thuc thuc thi tu dong khi ung dung khoi chay xong.
-     * Dung de seed (khoi tao) cac tai khoan mac dinh va chuyen tau mau neu co so du lieu dang rong.
+     * Dung de seed (khoi tao) cac tai khoan mac dinh va chuyen tau mau neu co so du
+     * lieu dang rong.
      *
      * @param args Tham so dong lenh truyen vao luc chay ung dung
      * @throws Exception Cac ngoai le xay ra khi ket noi/ghi du lieu vao database
@@ -76,10 +78,11 @@ public class DatabaseSeeder implements CommandLineRunner {
                     "Sài Gòn",
                     LocalDate.now().plusDays(5),
                     LocalTime.of(19, 0),
+                    LocalDate.now().plusDays(7),
+                    LocalTime.of(4, 30),
                     1200000.0,
                     100,
-                    sellerUser
-            );
+                    sellerUser);
 
             Train train2 = new Train(
                     "SE3",
@@ -87,10 +90,11 @@ public class DatabaseSeeder implements CommandLineRunner {
                     "Đà Nẵng",
                     LocalDate.now().plusDays(10),
                     LocalTime.of(22, 0),
+                    LocalDate.now().plusDays(11),
+                    LocalTime.of(14, 0),
                     800000.0,
                     100,
-                    sellerUser
-            );
+                    sellerUser);
 
             Train train3 = new Train(
                     "SE5",
@@ -98,10 +102,11 @@ public class DatabaseSeeder implements CommandLineRunner {
                     "Sài Gòn",
                     LocalDate.now().plusDays(3),
                     LocalTime.of(8, 30),
+                    LocalDate.now().plusDays(4),
+                    LocalTime.of(0, 30),
                     600000.0,
                     100,
-                    sellerUser
-            );
+                    sellerUser);
 
             trainRepository.save(train1);
             trainRepository.save(train2);
@@ -111,4 +116,3 @@ public class DatabaseSeeder implements CommandLineRunner {
         }
     }
 }
-

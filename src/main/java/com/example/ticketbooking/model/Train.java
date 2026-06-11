@@ -41,6 +41,14 @@ public class Train {
     @Column(name = "departure_time", nullable = false)
     private LocalTime departureTime;
 
+    @NotNull(message = "Arrival date is required")
+    @Column(name = "arrival_date", nullable = false)
+    private LocalDate arrivalDate;
+
+    @NotNull(message = "Arrival time is required")
+    @Column(name = "arrival_time", nullable = false)
+    private LocalTime arrivalTime;
+
     @Min(value = 0, message = "Price cannot be negative")
     @Column(nullable = false)
     private double price;
@@ -69,16 +77,20 @@ public class Train {
      * @param arrivalStation Ga den
      * @param departureDate Ngay di
      * @param departureTime Gio di
+     * @param arrivalDate Ngay den
+     * @param arrivalTime Gio den
      * @param price Gia ve cho mot ghe
      * @param totalSeats Tong so luong ghe tren tau
      * @param seller Tai khoan nguoi ban (Seller) dang chuyen tau nay
      */
-    public Train(String trainNumber, String departureStation, String arrivalStation, LocalDate departureDate, LocalTime departureTime, double price, int totalSeats, User seller) {
+    public Train(String trainNumber, String departureStation, String arrivalStation, LocalDate departureDate, LocalTime departureTime, LocalDate arrivalDate, LocalTime arrivalTime, double price, int totalSeats, User seller) {
         this.trainNumber = trainNumber;
         this.departureStation = departureStation;
         this.arrivalStation = arrivalStation;
         this.departureDate = departureDate;
         this.departureTime = departureTime;
+        this.arrivalDate = arrivalDate;
+        this.arrivalTime = arrivalTime;
         this.price = price;
         this.totalSeats = totalSeats;
         this.availableSeats = totalSeats;
@@ -263,5 +275,41 @@ public class Train {
      */
     public void setSeller(User seller) {
         this.seller = seller;
+    }
+
+    /**
+     * Lay ngay den.
+     *
+     * @return Ngay den (LocalDate)
+     */
+    public LocalDate getArrivalDate() {
+        return arrivalDate;
+    }
+
+    /**
+     * Thiet lap ngay den moi.
+     *
+     * @param arrivalDate Ngay den moi
+     */
+    public void setArrivalDate(LocalDate arrivalDate) {
+        this.arrivalDate = arrivalDate;
+    }
+
+    /**
+     * Lay gio den.
+     *
+     * @return Gio den (LocalTime)
+     */
+    public LocalTime getArrivalTime() {
+        return arrivalTime;
+    }
+
+    /**
+     * Thiet lap gio den moi.
+     *
+     * @param arrivalTime Gio den moi
+     */
+    public void setArrivalTime(LocalTime arrivalTime) {
+        this.arrivalTime = arrivalTime;
     }
 }

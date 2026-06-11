@@ -1245,3 +1245,219 @@ footer {
     align-items: center;
     justify-content: center;
 }
+
+/* ==========================================================================
+   Seat Selection Component Styles
+   ========================================================================== */
+.seat-map-section {
+    margin-top: 20px;
+    border-top: 1px solid var(--border-glass);
+    padding-top: 20px;
+}
+
+.seat-map-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+/* Coach/Carriage tabs navigation */
+.carriage-tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) transparent;
+}
+
+.carriage-tabs::-webkit-scrollbar {
+    height: 4px;
+}
+
+.carriage-tabs::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 2px;
+}
+
+.carriage-tab-btn {
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-glass);
+    color: var(--text-secondary);
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: var(--transition-smooth);
+}
+
+.carriage-tab-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+}
+
+.carriage-tab-btn.active {
+    background: linear-gradient(135deg, var(--primary), #6f1ec2);
+    color: var(--text-primary);
+    border-color: var(--primary);
+    box-shadow: 0 0 10px var(--primary-glow);
+}
+
+/* Seats layout grid (representing coach layout) */
+.seat-grid-container {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid var(--border-glass);
+    margin-bottom: 16px;
+    position: relative;
+}
+
+.seat-grid-container::before {
+    content: "COACH CABIN";
+    position: absolute;
+    top: -8px;
+    left: 16px;
+    font-size: 9px;
+    color: var(--text-muted);
+    background: #151a30;
+    padding: 0 6px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+
+.seat-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    max-width: 320px;
+    margin: 0 auto;
+}
+
+/* Individual seat node */
+.seat {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    user-select: none;
+}
+
+.seat.available {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-glass);
+    color: var(--text-secondary);
+}
+
+.seat.available:hover {
+    border-color: var(--secondary);
+    color: var(--text-primary);
+    transform: scale(1.08);
+    box-shadow: 0 0 8px var(--secondary-glow);
+}
+
+.seat.occupied {
+    background: rgba(255, 23, 68, 0.12);
+    border: 1px solid rgba(255, 23, 68, 0.25);
+    color: var(--error);
+    cursor: not-allowed;
+    position: relative;
+}
+
+.seat.occupied::after {
+    content: "";
+    position: absolute;
+    width: 60%;
+    height: 1px;
+    background: var(--error);
+    transform: rotate(-45deg);
+}
+
+.seat.selected {
+    background: linear-gradient(135deg, var(--secondary), #0072ff);
+    border: 1px solid var(--secondary);
+    color: #0b0d19;
+    font-weight: 700;
+    transform: scale(1.05);
+    box-shadow: 0 0 12px var(--secondary-glow);
+    animation: seatPulse 1.5s infinite alternate;
+}
+
+@keyframes seatPulse {
+    0% { box-shadow: 0 0 6px var(--secondary-glow); }
+    100% { box-shadow: 0 0 15px var(--secondary-glow); }
+}
+
+/* Seat map legends */
+.seat-legend {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+.legend-dot.available {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-glass);
+}
+
+.legend-dot.occupied {
+    background: rgba(255, 23, 68, 0.15);
+    border: 1px solid rgba(255, 23, 68, 0.3);
+}
+
+.legend-dot.selected {
+    background: linear-gradient(135deg, var(--secondary), #0072ff);
+    border: 1px solid var(--secondary);
+}
+
+/* Selected summaries styles */
+.selected-summary-box {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 20px;
+}
+
+.selected-seats-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.selected-seat-badge {
+    background: rgba(0, 240, 255, 0.1);
+    color: var(--secondary);
+    border: 1px solid var(--secondary-glow);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
