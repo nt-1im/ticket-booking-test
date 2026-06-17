@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - RailPass</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <header>
+        <nav class="navbar"></nav>
+    </header>
+
+    <main>
+        <div class="dashboard-grid">
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card glass-card revenue">
+                    <div class="stat-label">Network Revenue</div>
+                    <div id="admin-revenue-val" class="stat-val">0 VND</div>
+                </div>
+                <div class="stat-card glass-card bookings">
+                    <div id="admin-bookings-val" class="stat-val">0</div>
+                    <div class="stat-label">Total Bookings</div>
+                </div>
+                <div class="stat-card glass-card">
+                    <div id="admin-buyers-val" class="stat-val">0</div>
+                    <div class="stat-label">Active Buyers</div>
+                </div>
+                <div class="stat-card glass-card">
+                    <div id="admin-sellers-val" class="stat-val">0</div>
+                    <div class="stat-label">Registered Sellers</div>
+                </div>
+            </div>
+
+            <!-- User Management -->
+            <div>
+                <h3 style="margin-bottom: 16px;">User Accounts Management</h3>
+                <div class="table-container glass-card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-users-body">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--text-muted);">Loading user accounts...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Network Trains View -->
+            <div>
+                <h3 style="margin-bottom: 16px;">Registered Network Trains</h3>
+                <div class="table-container glass-card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Train Code</th>
+                                <th>Route</th>
+                                <th>Departure Schedule</th>
+                                <th>Ticket Price</th>
+                                <th>Seats Left</th>
+                                <th>Seller Owner</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-trains-body">
+                            <tr>
+                                <td colspan="7" style="text-align: center; color: var(--text-muted);">Loading trains...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Network Tickets View -->
+            <div>
+                <h3 style="margin-bottom: 16px;">Global Passenger Bookings</h3>
+                <div class="table-container glass-card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Train</th>
+                                <th>Route</th>
+                                <th>Seat Location</th>
+                                <th>Passenger</th>
+                                <th>ID Card</th>
+                                <th>Paid Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-tickets-body">
+                            <tr>
+                                <td colspan="8" style="text-align: center; color: var(--text-muted);">Loading bookings...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 RailPass. Experience premium transit booking.</p>
+    </footer>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>

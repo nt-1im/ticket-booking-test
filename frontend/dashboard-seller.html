@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Dashboard - RailPass</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <header>
+        <nav class="navbar"></nav>
+    </header>
+
+    <main>
+        <div class="dashboard-grid">
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card glass-card revenue">
+                    <div class="stat-label">Total Earnings</div>
+                    <div id="revenue-val" class="stat-val">0 VND</div>
+                </div>
+                <div class="stat-card glass-card bookings">
+                    <div id="tickets-val" class="stat-val">0</div>
+                    <div class="stat-label">Tickets Sold</div>
+                </div>
+                <div class="stat-card glass-card">
+                    <div id="trains-val" class="stat-val">0</div>
+                    <div class="stat-label">Trains Managed</div>
+                </div>
+            </div>
+
+            <!-- Fixed Route Manager -->
+            <div style="display: grid; grid-template-columns: 350px 1fr; gap: 30px;">
+                <!-- Add Route Form -->
+                <div class="glass-card" style="padding: 24px; height: fit-content;">
+                    <h3 style="margin-bottom: 20px;">Add Fixed Route</h3>
+                    <form id="route-form" onsubmit="createRouteSubmit(event)">
+                        <div class="form-group">
+                            <label class="form-label" for="route-departure">Departure Station</label>
+                            <input type="text" id="route-departure" class="form-input" placeholder="e.g. Hà Nội" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="route-arrival">Arrival Station</label>
+                            <input type="text" id="route-arrival" class="form-input" placeholder="e.g. Hải Phòng" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            Create Fixed Route
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Routes List -->
+                <div>
+                    <h3 style="margin-bottom: 16px;">My Predefined Fixed Routes</h3>
+                    <div class="table-container glass-card">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Departure Station</th>
+                                    <th>Arrival Station</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="seller-routes-body">
+                                <tr>
+                                    <td colspan="4" style="text-align: center; color: var(--text-muted);">Loading routes...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trains Manager -->
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>Managed Trains</h3>
+                    <button onclick="openAddTrainModal()" class="btn btn-primary btn-small">
+                        + Create Train Route
+                    </button>
+                </div>
+                <div class="table-container glass-card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Train Code</th>
+                                <th>Route</th>
+                                <th>Departure Schedule</th>
+                                <th>Arrival Schedule</th>
+                                <th>Ticket Price</th>
+                                <th>Capacity</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="seller-trains-body">
+                            <tr>
+                                <td colspan="8" style="text-align: center; color: var(--text-muted);">Loading trains...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Sales Record -->
+            <div>
+                <h3 style="margin-bottom: 16px;">Sales Record & Passengers</h3>
+                <div class="table-container glass-card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Train</th>
+                                <th>Seat Location</th>
+                                <th>Passenger</th>
+                                <th>ID Card</th>
+                                <th>Paid Amount</th>
+                                <th>Purchase Date</th>
+                                <th>Status</th>
+                                <th>Refund / Cancellation</th>
+                            </tr>
+                        </thead>
+                        <tbody id="seller-tickets-body">
+                            <tr>
+                                <td colspan="8" style="text-align: center; color: var(--text-muted);">Loading records...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Train CRUD Modal -->
+        <div id="train-modal" class="modal-overlay">
+            <div class="modal-box glass-card">
+                <div class="modal-header">
+                    <h3 id="train-modal-title">Create Train Route</h3>
+                    <button onclick="closeTrainModal()" class="modal-close">&times;</button>
+                </div>
+                <form id="train-form" onsubmit="submitTrainForm(event)">
+                    <div class="form-group">
+                        <label class="form-label" for="train-number">Train Code / Number</label>
+                        <input type="text" id="train-number" class="form-input" placeholder="e.g. SE1, SP3" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="train-route-select">Fixed Route</label>
+                        <select id="train-route-select" required>
+                            <!-- Routes injected dynamically -->
+                        </select>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label class="form-label" for="train-dep-date">Departure Date</label>
+                            <input type="date" id="train-dep-date" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="train-dep-time">Departure Time</label>
+                            <input type="time" id="train-dep-time" class="form-input" required>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label class="form-label" for="train-arr-date">Arrival Date</label>
+                            <input type="date" id="train-arr-date" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="train-arr-time">Arrival Time</label>
+                            <input type="time" id="train-arr-time" class="form-input" required>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label class="form-label" for="train-price">Ticket Price (VND)</label>
+                            <input type="number" id="train-price" class="form-input" min="0" placeholder="e.g. 500000" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="train-seats">Total Seats</label>
+                            <input type="number" id="train-seats" class="form-input" min="1" max="200" placeholder="e.g. 50" required>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px;">
+                        <button type="button" onclick="closeTrainModal()" class="btn btn-secondary">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Details</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 RailPass. Experience premium transit booking.</p>
+    </footer>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>

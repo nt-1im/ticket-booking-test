@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RailPass - Train Ticket Booking</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <header>
+        <nav class="navbar">
+            <!-- Rendered dynamically by main.js -->
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero-section">
+            <h1 class="hero-title">Discover Your Next Journey</h1>
+            <p class="hero-subtitle">Book high-speed train tickets instantly with the secure RailPass Booking Platform.</p>
+            
+            <div class="search-box glass-card">
+                <form id="search-form">
+                    <div class="search-grid">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label" for="departure">Departure Station</label>
+                            <input type="text" id="departure" class="form-input" placeholder="e.g. Hà Nội">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label" for="arrival">Arrival Station</label>
+                            <input type="text" id="arrival" class="form-input" placeholder="e.g. Sài Gòn">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label" for="date">Departure Date</label>
+                            <input type="date" id="date" class="form-input">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="height: 48px; padding: 0 30px;">
+                            Search Trains
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="trains-section">
+            <h2 class="trains-section-title">Available Departures</h2>
+            <div id="trains-grid" class="trains-grid">
+                <!-- Rendered dynamically by main.js -->
+                <div style="text-align: center; grid-column: 1/-1; padding: 40px; color: var(--text-muted);">
+                    Loading trains...
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 RailPass. Experience premium transit booking.</p>
+    </footer>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>

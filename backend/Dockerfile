@@ -1,0 +1,18 @@
+# --- Build Stage ---
+FROM maven:3.9.6-eclipse-temurin-17 AS build
+WORKDIR /backend
+COPY backend/pom.xml .
+COPY frontend /frontend
+COPY backend/src ./src
+RUN mvn package -DskipTests -B
+
+# --- Run Stage ---
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+COPY --from=build /backend/target/ticket-booking-0.0.1-SNAPSHOT.jar app.jar
+
+# Render exposes PORT environment variable which we bind to server.port
+ENV PORT=8085
+EXPOSE 8085
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

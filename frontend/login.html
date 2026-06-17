@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - RailPass</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <header>
+        <nav class="navbar"></nav>
+    </header>
+
+    <main class="auth-wrapper">
+        <div class="auth-card glass-card">
+            <div class="auth-header">
+                <h2>Welcome Back</h2>
+                <p>Choose your authentication mode to sign in.</p>
+            </div>
+
+            <!-- Authentication Mode Selector -->
+            <div class="auth-mode-toggle">
+                <div id="tab-session" class="toggle-tab active">Session Mode</div>
+                <div id="tab-token" class="toggle-tab">Token (JWT) Mode</div>
+            </div>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label class="form-label" for="username">Username</label>
+                    <input type="text" id="username" class="form-input" placeholder="Enter your username" required autofocus>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+                    Sign In
+                </button>
+            </form>
+
+            <div style="text-align: center; margin-top: 24px; font-size: 14px; color: var(--text-muted);">
+                Don't have an account? <a href="/register.html" style="color: var(--primary); text-decoration: none; font-weight: 600;">Sign Up</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 RailPass. Experience premium transit booking.</p>
+    </footer>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>

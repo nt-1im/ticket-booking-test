@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Train Details & Seat Map - RailPass</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <header>
+        <nav class="navbar"></nav>
+    </header>
+
+    <main>
+        <div class="detail-grid">
+            <!-- Left Panel: Interactive Seat Map -->
+            <div>
+                <div class="carriage-container glass-card">
+                    <div class="carriage-header">
+                        <h3>Carriage Seat Map Selection</h3>
+                        <span id="seats-remaining" class="badge badge-success">Loading seats...</span>
+                    </div>
+
+                    <div class="seat-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3);"></div>
+                            <span>Available</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: var(--primary);"></div>
+                            <span>Selected</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3);"></div>
+                            <span>Booked</span>
+                        </div>
+                    </div>
+
+                    <div id="seat-map-grid" class="seat-map-grid">
+                        <!-- Seats dynamically injected -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Trip Info & Booking Form -->
+            <div class="glass-card" style="padding: 30px;">
+                <h3 style="margin-bottom: 20px;">Journey Details</h3>
+                
+                <div style="margin-bottom: 24px;">
+                    <div style="font-size: 14px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Train Code</div>
+                    <div id="train-number-title" style="font-size: 24px; font-weight: 700; color: var(--primary);">SE-0</div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px;">
+                    <div>
+                        <div style="font-size: 13px; color: var(--text-muted);">Route</div>
+                        <div id="route-display" style="font-weight: 600;">...</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 13px; color: var(--text-muted);">Departure</div>
+                        <div id="departure-details" style="font-weight: 600;">...</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 13px; color: var(--text-muted);">Arrival</div>
+                        <div id="arrival-details" style="font-weight: 600;">...</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 13px; color: var(--text-muted);">Ticket Cost (Per Seat)</div>
+                        <div id="ticket-price" style="font-weight: 700; color: var(--accent);">0 VND</div>
+                    </div>
+                </div>
+
+                <form id="booking-form">
+                    <h3 style="font-size: 18px; margin-bottom: 16px;">Passenger Info</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="passengerName">Full Name</label>
+                        <input type="text" id="passengerName" class="form-input" placeholder="e.g. John Doe" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="passengerIdCard">ID Card / Passport</label>
+                        <input type="text" id="passengerIdCard" class="form-input" placeholder="e.g. 0123456789" required>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--panel-border); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: var(--text-muted);">Selected Seats:</span>
+                            <span id="selected-seats-list" style="font-weight: 600; color: var(--accent);">None</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px; font-size: 16px; font-weight: 700;">
+                            <span>Total Price:</span>
+                            <span id="total-cost-display" style="color: var(--success);">0 VND</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        Confirm Booking
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 RailPass. Experience premium transit booking.</p>
+    </footer>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>

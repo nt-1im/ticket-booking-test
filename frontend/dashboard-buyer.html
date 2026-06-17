@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buyer Dashboard - RailPass</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <header>
+        <nav class="navbar"></nav>
+    </header>
+
+    <main>
+        <div class="dashboard-grid">
+            <div>
+                <h2 style="margin-bottom: 8px;">My Ticket Bookings</h2>
+                <p style="color: var(--text-muted); margin-bottom: 24px;">Manage your reservations, check carriage seat locations, or request cancellation refunds.</p>
+                
+                <div class="table-container glass-card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Train</th>
+                                <th>Route</th>
+                                <th>Departure</th>
+                                <th>Seats</th>
+                                <th>Passenger</th>
+                                <th>ID Card</th>
+                                <th>Total Cost</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="buyer-tickets-body">
+                            <tr>
+                                <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 30px;">Loading bookings...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 RailPass. Experience premium transit booking.</p>
+    </footer>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>
