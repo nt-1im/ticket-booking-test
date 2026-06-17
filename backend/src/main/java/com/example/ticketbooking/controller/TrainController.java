@@ -123,15 +123,26 @@ public class TrainController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{\"message\": \"Only sellers and admins can create trains\"}");
         }
 
-        Optional<Route> routeOpt = routeService.getRouteById(trainRequest.getRouteId());
-        if (routeOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("{\"message\": \"Route not found with ID: " + trainRequest.getRouteId() + "\"}");
+        Route route = null;
+        if (trainRequest.getRouteId() != null) {
+            Optional<Route> routeOpt = routeService.getRouteById(trainRequest.getRouteId());
+            if (routeOpt.isEmpty()) {
+                return ResponseEntity.badRequest().body("{\"message\": \"Route not found with ID: " + trainRequest.getRouteId() + "\"}");
+            }
+            route = routeOpt.get();
+        } else {
+            String dep = trainRequest.getDepartureStation();
+            String arr = trainRequest.getArrivalStation();
+            if (dep == null || dep.isBlank() || arr == null || arr.isBlank()) {
+                return ResponseEntity.badRequest().body("{\"message\": \"Either Route ID or Departure/Arrival Stations must be provided\"}");
+            }
+            route = routeService.getOrCreateRoute(dep.trim(), arr.trim(), currentUser);
         }
 
         try {
             Train train = new Train(
                     trainRequest.getTrainNumber(),
-                    routeOpt.get(),
+                    route,
                     trainRequest.getDepartureDate(),
                     trainRequest.getDepartureTime(),
                     trainRequest.getArrivalDate(),
@@ -145,6 +156,61 @@ public class TrainController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("{\"message\": \"Failed to create train: " + e.getMessage() + "\"}");
         }
+    }
+
+    /**
+     * Tao hang loat cac chuyen tau theo lich dinh ky hang ngay (Seller/Admin).
+     */
+    @PostMapping("/recurring")
+    public ResponseEntity<?> createRecurringTrains(@Valid @RequestBody RecurringTrainRequest request) {
+        User currentUser = getAuthenticatedUser();
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{\"message\": \"Unauthorized\"}");
+        }
+        if (currentUser.getRole() != Role.ROLE_SELLER && currentUser.getRole() != Role.ROLE_ADMIN) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{\"message\": \"Only sellers and admins can create trains\"}");
+        }
+
+        Route route = null;
+        if (request.getRouteId() != null) {
+            Optional<Route> routeOpt = routeService.getRouteById(request.getRouteId());
+            if (routeOpt.isEmpty()) {
+                return ResponseEntity.badRequest().body("{\"message\": \"Route not found with ID: " + request.getRouteId() + "\"}");
+            }
+            route = routeOpt.get();
+        } else {
+            String dep = request.getDepartureStation();
+            String arr = request.getArrivalStation();
+            if (dep == null || dep.isBlank() || arr == null || arr.isBlank()) {
+                return ResponseEntity.badRequest().body("{\"message\": \"Either Route ID or Departure/Arrival Stations must be provided\"}");
+            }
+            route = routeService.getOrCreateRoute(dep.trim(), arr.trim(), currentUser);
+        }
+
+        if (request.getStartDate().isAfter(request.getEndDate())) {
+            return ResponseEntity.badRequest().body("{\"message\": \"Start date must be before or equal to End date\"}");
+        }
+
+        List<Train> createdTrains = new java.util.ArrayList<>();
+        LocalDate curDate = request.getStartDate();
+        while (!curDate.isAfter(request.getEndDate())) {
+            Train train = new Train(
+                    request.getTrainNumber(),
+                    route,
+                    curDate,
+                    request.getDepartureTime(),
+                    curDate.plusDays(request.getArrivalOffsetDays()),
+                    request.getArrivalTime(),
+                    request.getPrice(),
+                    request.getTotalSeats(),
+                    currentUser
+            );
+            trainService.saveTrain(train, currentUser);
+            createdTrains.add(train);
+            curDate = curDate.plusDays(1);
+        }
+
+        return ResponseEntity.ok("{\"message\": \"Created " + createdTrains.size() + " trains successfully\"}");
     }
 
     /**
@@ -167,14 +233,25 @@ public class TrainController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{\"message\": \"Unauthorized to manage this train\"}");
         }
 
-        Optional<Route> routeOpt = routeService.getRouteById(trainRequest.getRouteId());
-        if (routeOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("{\"message\": \"Route not found\"}");
+        Route route = null;
+        if (trainRequest.getRouteId() != null) {
+            Optional<Route> routeOpt = routeService.getRouteById(trainRequest.getRouteId());
+            if (routeOpt.isEmpty()) {
+                return ResponseEntity.badRequest().body("{\"message\": \"Route not found\"}");
+            }
+            route = routeOpt.get();
+        } else {
+            String dep = trainRequest.getDepartureStation();
+            String arr = trainRequest.getArrivalStation();
+            if (dep == null || dep.isBlank() || arr == null || arr.isBlank()) {
+                return ResponseEntity.badRequest().body("{\"message\": \"Either Route ID or Departure/Arrival Stations must be provided\"}");
+            }
+            route = routeService.getOrCreateRoute(dep.trim(), arr.trim(), currentUser);
         }
 
         try {
             existingTrain.setTrainNumber(trainRequest.getTrainNumber());
-            existingTrain.setRoute(routeOpt.get());
+            existingTrain.setRoute(route);
             existingTrain.setDepartureDate(trainRequest.getDepartureDate());
             existingTrain.setDepartureTime(trainRequest.getDepartureTime());
             existingTrain.setArrivalDate(trainRequest.getArrivalDate());
@@ -242,8 +319,9 @@ public class TrainController {
         @NotBlank(message = "Train number is required")
         private String trainNumber;
 
-        @NotNull(message = "Route ID is required")
         private Long routeId;
+        private String departureStation;
+        private String arrivalStation;
 
         @NotNull(message = "Departure date is required")
         private LocalDate departureDate;
@@ -267,6 +345,10 @@ public class TrainController {
         public void setTrainNumber(String trainNumber) { this.trainNumber = trainNumber; }
         public Long getRouteId() { return routeId; }
         public void setRouteId(Long routeId) { this.routeId = routeId; }
+        public String getDepartureStation() { return departureStation; }
+        public void setDepartureStation(String departureStation) { this.departureStation = departureStation; }
+        public String getArrivalStation() { return arrivalStation; }
+        public void setArrivalStation(String arrivalStation) { this.arrivalStation = arrivalStation; }
         public LocalDate getDepartureDate() { return departureDate; }
         public void setDepartureDate(LocalDate departureDate) { this.departureDate = departureDate; }
         public LocalTime getDepartureTime() { return departureTime; }
@@ -275,6 +357,58 @@ public class TrainController {
         public void setArrivalDate(LocalDate arrivalDate) { this.arrivalDate = arrivalDate; }
         public LocalTime getArrivalTime() { return arrivalTime; }
         public void setArrivalTime(LocalTime arrivalTime) { this.arrivalTime = arrivalTime; }
+        public double getPrice() { return price; }
+        public void setPrice(double price) { this.price = price; }
+        public int getTotalSeats() { return totalSeats; }
+        public void setTotalSeats(int totalSeats) { this.totalSeats = totalSeats; }
+    }
+
+    public static class RecurringTrainRequest {
+        @NotBlank(message = "Train number is required")
+        private String trainNumber;
+
+        private Long routeId;
+        private String departureStation;
+        private String arrivalStation;
+
+        @NotNull(message = "Start date is required")
+        private LocalDate startDate;
+
+        @NotNull(message = "End date is required")
+        private LocalDate endDate;
+
+        @NotNull(message = "Departure time is required")
+        private LocalTime departureTime;
+
+        @NotNull(message = "Arrival time is required")
+        private LocalTime arrivalTime;
+
+        private int arrivalOffsetDays;
+
+        @Min(value = 0, message = "Price must be non-negative")
+        private double price;
+
+        @Min(value = 1, message = "Total seats must be at least 1")
+        private int totalSeats;
+
+        public String getTrainNumber() { return trainNumber; }
+        public void setTrainNumber(String trainNumber) { this.trainNumber = trainNumber; }
+        public Long getRouteId() { return routeId; }
+        public void setRouteId(Long routeId) { this.routeId = routeId; }
+        public String getDepartureStation() { return departureStation; }
+        public void setDepartureStation(String departureStation) { this.departureStation = departureStation; }
+        public String getArrivalStation() { return arrivalStation; }
+        public void setArrivalStation(String arrivalStation) { this.arrivalStation = arrivalStation; }
+        public LocalDate getStartDate() { return startDate; }
+        public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
+        public LocalDate getEndDate() { return endDate; }
+        public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
+        public LocalTime getDepartureTime() { return departureTime; }
+        public void setDepartureTime(LocalTime departureTime) { this.departureTime = departureTime; }
+        public LocalTime getArrivalTime() { return arrivalTime; }
+        public void setArrivalTime(LocalTime arrivalTime) { this.arrivalTime = arrivalTime; }
+        public int getArrivalOffsetDays() { return arrivalOffsetDays; }
+        public void setArrivalOffsetDays(int arrivalOffsetDays) { this.arrivalOffsetDays = arrivalOffsetDays; }
         public double getPrice() { return price; }
         public void setPrice(double price) { this.price = price; }
         public int getTotalSeats() { return totalSeats; }

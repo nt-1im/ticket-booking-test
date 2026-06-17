@@ -143,28 +143,75 @@
                         <input type="text" id="train-number" class="form-input" placeholder="e.g. SE1, SP3" required>
                     </div>
 
-                    <div class="form-group">
+                    <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
+                        <input type="checkbox" id="train-new-route" onchange="toggleRouteInput(this.checked)">
+                        <label for="train-new-route" style="user-select: none; font-size: 14px; font-weight: 500;">Create New Route on-the-fly</label>
+                    </div>
+
+                    <div id="route-select-wrapper" class="form-group">
                         <label class="form-label" for="train-route-select">Fixed Route</label>
-                        <select id="train-route-select" required>
+                        <select id="train-route-select">
                             <!-- Routes injected dynamically -->
                         </select>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div class="form-group">
-                            <label class="form-label" for="train-dep-date">Departure Date</label>
-                            <input type="date" id="train-dep-date" class="form-input" required>
+                    <div id="route-custom-wrapper" style="display: none; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label" for="train-departure-custom">Departure Station</label>
+                            <input type="text" id="train-departure-custom" class="form-input" placeholder="e.g. Hà Nội">
                         </div>
-                        <div class="form-group">
-                            <label class="form-label" for="train-dep-time">Departure Time</label>
-                            <input type="time" id="train-dep-time" class="form-input" required>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label" for="train-arrival-custom">Arrival Station</label>
+                            <input type="text" id="train-arrival-custom" class="form-input" placeholder="e.g. Hải Phòng">
                         </div>
                     </div>
 
+                    <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
+                        <input type="checkbox" id="train-recurring" onchange="toggleRecurringInput(this.checked)">
+                        <label for="train-recurring" style="user-select: none; font-size: 14px; font-weight: 500;">Recurring Daily Schedule</label>
+                    </div>
+
+                    <!-- Single Date Fields -->
+                    <div id="single-date-wrapper">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div class="form-group">
+                                <label class="form-label" for="train-dep-date">Departure Date</label>
+                                <input type="date" id="train-dep-date" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="train-arr-date">Arrival Date</label>
+                                <input type="date" id="train-arr-date" class="form-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recurring Date Fields -->
+                    <div id="recurring-date-wrapper" style="display: none; margin-bottom: 15px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label" for="train-start-date">Start Date</label>
+                                <input type="date" id="train-start-date" class="form-input">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label" for="train-end-date">End Date</label>
+                                <input type="date" id="train-end-date" class="form-input">
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label" for="train-arrival-offset">Arrival Day Offset</label>
+                            <select id="train-arrival-offset" class="form-input">
+                                <option value="0">Same day (0 days offset)</option>
+                                <option value="1">Next day (1 day offset)</option>
+                                <option value="2">2 days later (2 days offset)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Time Fields -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                         <div class="form-group">
-                            <label class="form-label" for="train-arr-date">Arrival Date</label>
-                            <input type="date" id="train-arr-date" class="form-input" required>
+                            <label class="form-label" for="train-dep-time">Departure Time</label>
+                            <input type="time" id="train-dep-time" class="form-input" required>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="train-arr-time">Arrival Time</label>

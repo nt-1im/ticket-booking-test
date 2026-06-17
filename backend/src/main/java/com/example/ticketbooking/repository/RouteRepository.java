@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository de thao tac voi co so du lieu cho thuc the Route.
@@ -19,4 +20,11 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
      * @return Danh sach cac tuyen duong
      */
     List<Route> findBySellerId(Long sellerId);
+
+    /**
+     * Tim tuyen duong co dinh theo ga di, ga den va nguoi ban.
+     */
+    Optional<Route> findByDepartureStationIgnoreCaseAndArrivalStationIgnoreCaseAndSellerId(
+            String departureStation, String arrivalStation, Long sellerId);
 }
+

@@ -659,19 +659,91 @@ async function deleteRoute(routeId) {
     }
 }
 
+function toggleRouteInput(isNew) {
+    const selectWrapper = document.getElementById('route-select-wrapper');
+    const customWrapper = document.getElementById('route-custom-wrapper');
+    const selectEl = document.getElementById('train-route-select');
+    const depCustom = document.getElementById('train-departure-custom');
+    const arrCustom = document.getElementById('train-arrival-custom');
+
+    if (isNew) {
+        selectWrapper.style.display = 'none';
+        customWrapper.style.display = 'grid';
+        selectEl.removeAttribute('required');
+        depCustom.setAttribute('required', 'true');
+        arrCustom.setAttribute('required', 'true');
+    } else {
+        selectWrapper.style.display = 'block';
+        customWrapper.style.display = 'none';
+        selectEl.setAttribute('required', 'true');
+        depCustom.removeAttribute('required');
+        arrCustom.removeAttribute('required');
+    }
+}
+
+function toggleRecurringInput(isRecurring) {
+    const singleWrapper = document.getElementById('single-date-wrapper');
+    const recurringWrapper = document.getElementById('recurring-date-wrapper');
+    
+    const depDate = document.getElementById('train-dep-date');
+    const arrDate = document.getElementById('train-arr-date');
+    const startDate = document.getElementById('train-start-date');
+    const endDate = document.getElementById('train-end-date');
+
+    if (isRecurring) {
+        singleWrapper.style.display = 'none';
+        recurringWrapper.style.display = 'block';
+        
+        depDate.removeAttribute('required');
+        arrDate.removeAttribute('required');
+        startDate.setAttribute('required', 'true');
+        endDate.setAttribute('required', 'true');
+    } else {
+        singleWrapper.style.display = 'block';
+        recurringWrapper.style.display = 'none';
+        
+        depDate.setAttribute('required', 'true');
+        arrDate.setAttribute('required', 'true');
+        startDate.removeAttribute('required');
+        endDate.removeAttribute('required');
+    }
+}
+
 // Open modals
 let editingTrainId = null;
 function openAddTrainModal() {
     editingTrainId = null;
     document.getElementById('train-modal-title').innerText = 'Create Train Route';
     document.getElementById('train-form').reset();
+    
+    // Reset toggle states
+    document.getElementById('train-new-route').checked = false;
+    document.getElementById('train-recurring').checked = false;
+    toggleRouteInput(false);
+    toggleRecurringInput(false);
+    
+    // Show recurring option
+    document.getElementById('train-recurring').parentElement.style.display = 'flex';
+    
     document.getElementById('train-modal').classList.add('active');
 }
 
 function openEditTrainModal(train) {
     editingTrainId = train.id;
     document.getElementById('train-modal-title').innerText = 'Edit Train Details';
+    document.getElementById('train-form').reset();
+    
     document.getElementById('train-number').value = train.trainNumber;
+    
+    // Reset toggles for editing
+    document.getElementById('train-new-route').checked = false;
+    document.getElementById('train-recurring').checked = false;
+    toggleRouteInput(false);
+    toggleRecurringInput(false);
+    
+    // Hide recurring schedule option when editing an existing train
+    document.getElementById('train-recurring').parentElement.style.display = 'none';
+    
     document.getElementById('train-route-select').value = train.routeId;
     document.getElementById('train-dep-date').value = train.departureDate;
     document.getElementById('train-dep-time').value = train.departureTime.substring(0,5);
@@ -690,36 +762,58 @@ function closeTrainModal() {
 async function submitTrainForm(e) {
     e.preventDefault();
     const trainNumber = document.getElementById('train-number').value;
+    const isNewRoute = document.getElementById('train-new-route').checked;
     const routeId = document.getElementById('train-route-select').value;
-    const departureDate = document.getElementById('train-dep-date').value;
+    const departureStation = document.getElementById('train-departure-custom').value;
+    const arrivalStation = document.getElementById('train-arrival-custom').value;
+    const isRecurring = document.getElementById('train-recurring').checked;
+
     const departureTime = document.getElementById('train-dep-time').value;
-    const arrivalDate = document.getElementById('train-arr-date').value;
     const arrivalTime = document.getElementById('train-arr-time').value;
     const price = parseFloat(document.getElementById('train-price').value);
     const totalSeats = parseInt(document.getElementById('train-seats').value);
 
-    const payload = {
+    let payload = {
         trainNumber,
-        routeId: parseInt(routeId),
-        departureDate,
         departureTime: departureTime + ':00',
-        arrivalDate,
         arrivalTime: arrivalTime + ':00',
         price,
         totalSeats
     };
 
-    try {
-        const url = editingTrainId ? `/api/trains/${editingTrainId}` : '/api/trains';
-        const method = editingTrainId ? 'PUT' : 'POST';
+    if (isNewRoute) {
+        payload.departureStation = departureStation;
+        payload.arrivalStation = arrivalStation;
+    } else {
+        payload.routeId = parseInt(routeId);
+    }
 
+    let url = '/api/trains';
+    let method = 'POST';
+
+    if (editingTrainId) {
+        url = `/api/trains/${editingTrainId}`;
+        method = 'PUT';
+        payload.departureDate = document.getElementById('train-dep-date').value;
+        payload.arrivalDate = document.getElementById('train-arr-date').value;
+    } else if (isRecurring) {
+        url = '/api/trains/recurring';
+        payload.startDate = document.getElementById('train-start-date').value;
+        payload.endDate = document.getElementById('train-end-date').value;
+        payload.arrivalOffsetDays = parseInt(document.getElementById('train-arrival-offset').value);
+    } else {
+        payload.departureDate = document.getElementById('train-dep-date').value;
+        payload.arrivalDate = document.getElementById('train-arr-date').value;
+    }
+
+    try {
         const res = await Auth.fetch(url, {
             method,
             body: payload
         });
 
         if (res.ok) {
-            showToast(editingTrainId ? 'Train updated successfully!' : 'Train created successfully!', 'success');
+            showToast(editingTrainId ? 'Train updated successfully!' : 'Train schedule(s) created successfully!', 'success');
             closeTrainModal();
             initSellerDashboard();
         } else {

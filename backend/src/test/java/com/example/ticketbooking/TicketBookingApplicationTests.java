@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -127,5 +128,75 @@ class TicketBookingApplicationTests {
 		}
 		// Check uniqueness by comparing size with set size
 		assertEquals(5, (int) seatNumbers.stream().distinct().count(), "All assigned seat numbers must be unique");
+	}
+
+	@Autowired
+	private com.example.ticketbooking.controller.TrainController trainController;
+
+	@Test
+	void testCreateTrainWithCustomRoute() {
+		User seller = userRepository.findByUsername("seller").orElseGet(() -> {
+			User u = new User("seller", "seller123", "seller@test.com", Role.ROLE_SELLER);
+			return userRepository.save(u);
+		});
+
+		// Mock authentication context for Seller
+		org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(
+				new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(seller, null, seller.getAuthorities())
+		);
+
+		com.example.ticketbooking.controller.TrainController.TrainRequest request = new com.example.ticketbooking.controller.TrainController.TrainRequest();
+		request.setTrainNumber("ON_THE_FLY");
+		request.setDepartureStation("CustomDep");
+		request.setArrivalStation("CustomArr");
+		request.setDepartureDate(LocalDate.now().plusDays(2));
+		request.setDepartureTime(LocalTime.of(8, 0));
+		request.setArrivalDate(LocalDate.now().plusDays(2));
+		request.setArrivalTime(LocalTime.of(10, 0));
+		request.setPrice(100000.0);
+		request.setTotalSeats(60);
+
+		org.springframework.http.ResponseEntity<?> response = trainController.createTrain(request);
+		assertEquals(org.springframework.http.HttpStatus.OK, response.getStatusCode());
+
+		// Verify route was created automatically
+		Optional<Route> route = routeRepository.findByDepartureStationIgnoreCaseAndArrivalStationIgnoreCaseAndSellerId("CustomDep", "CustomArr", seller.getId());
+		assertTrue(route.isPresent());
+	}
+
+	@Test
+	void testCreateRecurringTrains() {
+		User seller = userRepository.findByUsername("seller").orElseGet(() -> {
+			User u = new User("seller", "seller123", "seller@test.com", Role.ROLE_SELLER);
+			return userRepository.save(u);
+		});
+
+		// Mock authentication context for Seller
+		org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(
+				new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(seller, null, seller.getAuthorities())
+		);
+
+		com.example.ticketbooking.controller.TrainController.RecurringTrainRequest request = new com.example.ticketbooking.controller.TrainController.RecurringTrainRequest();
+		request.setTrainNumber("RECURRING_TEST");
+		request.setDepartureStation("RecDep");
+		request.setArrivalStation("RecArr");
+		request.setStartDate(LocalDate.now().plusDays(3));
+		request.setEndDate(LocalDate.now().plusDays(5));
+		request.setDepartureTime(LocalTime.of(6, 0));
+		request.setArrivalTime(LocalTime.of(9, 0));
+		request.setArrivalOffsetDays(0);
+		request.setPrice(150000.0);
+		request.setTotalSeats(40);
+
+		org.springframework.http.ResponseEntity<?> response = trainController.createRecurringTrains(request);
+		assertEquals(org.springframework.http.HttpStatus.OK, response.getStatusCode());
+
+		// Start is +3 days, end is +5 days -> 3 days in total (+3, +4, +5)
+		// Let's verify train repository contains these trains
+		List<Train> trains = trainRepository.findAllByOrderByDepartureDateAscDepartureTimeAsc();
+		long count = trains.stream()
+				.filter(t -> "RECURRING_TEST".equals(t.getTrainNumber()))
+				.count();
+		assertEquals(3, count);
 	}
 }

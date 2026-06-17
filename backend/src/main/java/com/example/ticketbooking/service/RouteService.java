@@ -42,6 +42,16 @@ public class RouteService {
     }
 
     @Transactional
+    public Route getOrCreateRoute(String departureStation, String arrivalStation, User seller) {
+        return routeRepository.findByDepartureStationIgnoreCaseAndArrivalStationIgnoreCaseAndSellerId(
+                departureStation, arrivalStation, seller.getId())
+                .orElseGet(() -> {
+                    Route route = new Route(departureStation, arrivalStation, seller);
+                    return routeRepository.save(route);
+                });
+    }
+
+    @Transactional
     public void deleteRoute(Long id) {
         routeRepository.deleteById(id);
     }
